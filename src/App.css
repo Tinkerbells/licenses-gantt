@@ -1,42 +1,196 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Глобальные стили */
+body {
+  font-family: "Roboto", Arial, sans-serif;
+  background-color: #f5f7fa;
+  color: #333;
+  line-height: 1.5;
+}
+
+/* Основной контейнер приложения */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Шапка */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  display: flex;
+  align-items: center;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.logo img {
+  height: 30px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* Панель пользователя */
+.user-info {
+  display: flex;
+  align-items: center;
 }
 
-.card {
-  padding: 2em;
+.language-selector {
+  display: flex;
+  margin-right: 15px;
 }
 
-.read-the-docs {
+.lang-btn {
+  background: none;
+  border: none;
   color: #888;
+  padding: 5px 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.lang-btn.active {
+  color: #0e64a0;
+  font-weight: 500;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  margin-right: 15px;
+  cursor: pointer;
+  color: #888;
+}
+
+.material-icons {
+  font-size: 20px;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+}
+
+.user-name {
+  font-size: 14px;
+  margin-right: 10px;
+  color: #555;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  background-color: #0e64a0;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Основное содержимое */
+.app-main {
+  flex: 1;
+  padding: 20px;
+  position: relative;
+}
+
+/* Панель с информацией о лицензии */
+.license-details {
+  position: absolute;
+  top: 70px;
+  right: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  width: 350px;
+  z-index: 100;
+}
+
+.license-details h3 {
+  margin-bottom: 15px;
+  font-size: 16px;
+  color: #0e64a0;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.details-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.detail-label {
+  font-weight: 500;
+  color: #666;
+  font-size: 14px;
+}
+
+.detail-value {
+  font-size: 14px;
+}
+
+.detail-value.status-active {
+  color: #4caf50;
+  font-weight: 500;
+}
+
+.detail-value.status-expired {
+  color: #f44336;
+  font-weight: 500;
+}
+
+.detail-value.status-pending {
+  color: #ff9800;
+  font-weight: 500;
+}
+
+.close-details {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #888;
+}
+
+/* Адаптивный дизайн */
+@media (max-width: 768px) {
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .user-info {
+    margin-top: 10px;
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .license-details {
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    border-radius: 8px 8px 0 0;
+  }
 }
