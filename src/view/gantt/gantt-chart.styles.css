@@ -1,0 +1,226 @@
+/* Основной контейнер */
+.license-gantt-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+/* Контейнер диаграммы */
+.license-gantt-chart {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  cursor: move;
+}
+
+/* Стили для SVG элементов */
+.gantt-chart {
+  background-color: #ffffff;
+}
+
+/* Стили для сетки */
+.vertical-grid-lines line,
+.horizontal-grid-lines line {
+  shape-rendering: crispEdges;
+}
+
+.horizontal-grid-lines line {
+  stroke-opacity: 0.7;
+}
+
+/* Стили для вертикальных линий разных периодов */
+.year-lines line {
+  stroke-opacity: 0.9;
+}
+
+.quarter-lines line {
+  stroke-opacity: 0.8;
+}
+
+.month-lines line {
+  stroke-opacity: 0.6;
+}
+
+.week-lines line {
+  stroke-opacity: 0.4;
+}
+
+.day-lines line {
+  stroke-opacity: 0.3;
+}
+
+/* Стили для осей */
+.x-axis path,
+.y-axis path,
+.brush-time-axis path {
+  stroke: #e0e0e0;
+}
+
+.x-axis line,
+.y-axis line,
+.brush-time-axis line {
+  stroke: #e0e0e0;
+}
+
+.x-axis text,
+.y-axis text,
+.brush-time-axis text {
+  font-size: 10px;
+  fill: #666;
+}
+
+/* Стили для элементов лицензий */
+.license-bar {
+  fill: #f0f0f0;
+  stroke: #cccccc;
+}
+
+.license-active .license-bar {
+  fill: #e6f2ff;
+  stroke: #a9d1f7;
+}
+
+.license-expired .license-bar {
+  fill: #ffe6e6;
+  stroke: #ffb3b3;
+}
+
+.license-renewal .license-bar {
+  fill: #fff9e6;
+  stroke: #ffd480;
+}
+
+.company-label {
+  fill: #444;
+  font-weight: 500;
+}
+
+.status-label {
+  fill: #666;
+}
+
+.amount-bg {
+  fill: #e6f2ff;
+  stroke: #a9d1f7;
+}
+
+.amount-label {
+  fill: #0078d4;
+  font-weight: bold;
+}
+
+.nav-arrow {
+  fill: #4682b4;
+}
+
+/* Стили для brush */
+.horizontal-brush,
+.vertical-brush {
+  background-color: transparent;
+}
+
+.brush .selection {
+  fill: #cce4f7;
+  stroke: #0078d4;
+  stroke-width: 1px;
+}
+
+.brush .handle {
+  fill: #0078d4;
+  stroke: #005a9e;
+}
+
+.brush-date-label {
+  pointer-events: none;
+}
+
+/* Стили для загрузки и ошибок */
+.gantt-loading,
+.gantt-error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  text-align: center;
+}
+
+.loading-spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #0078d4;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 2s linear infinite;
+  margin: 0 auto 20px;
+}
+
+.gantt-error {
+  color: #d83b01;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.gantt-error button {
+  padding: 5px 15px;
+  background-color: #0078d4;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.gantt-error button:hover {
+  background-color: #106ebe;
+}
+
+/* Анимация загрузки */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Стили для текущей даты */
+.current-date-line {
+  stroke: #ff6b6b;
+  stroke-width: 2px;
+  stroke-dasharray: 5, 3;
+}
+
+.current-date-label {
+  fill: #ff6b6b;
+  font-weight: bold;
+}
+
+/* Медиа-запросы для адаптивности */
+@media screen and (max-width: 768px) {
+  .company-label,
+  .status-label,
+  .amount-label {
+    font-size: 10px;
+  }
+
+  .x-axis text,
+  .y-axis text,
+  .brush-time-axis text {
+    font-size: 8px;
+  }
+
+  .time-labels text {
+    font-size: 10px;
+  }
+}

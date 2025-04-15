@@ -1,251 +1,246 @@
 import * as d3 from 'd3'
 
-import type {
-  BrushState,
-  License,
-  LicenseItem,
-} from '../types/license.types'
-
-import {
-  TimeScale,
-} from '../types/license.types'
+import type { DateGranularity, ExtendedLicense, License } from '../types/license.types'
 
 /**
- * Преобразует данные лицензий в формат для отображения на диаграмме
- * @param licenses Исходные данные о лицензиях
- * @returns Массив элементов для отображения на диаграмме
+ * Преобразует данные лицензий в расширенный формат для диаграммы
+ * @param licenses Исходные данные лицензий
+ * @returns Расширенные данные для диаграммы
  */
-export function processLicenseData(licenses: License[]): LicenseItem[] {
-  // Группировка по компаниям для распределения по дорожкам
-  const companiesMap = new Map<string, number>()
+export function prepareLicenseData(licenses: License[]): ExtendedLicense[] {
+  // Сортируем лицензии по дате
+  const sortedLicenses = [...licenses].sort((a, b) =>
+    new Date(a.date).getTime() - new Date(b.date).getTime(),
+  )
 
-  // Назначаем каждой компании свою дорожку (lane)
-  licenses.forEach((license) => {
-    if (!companiesMap.has(license.company)) {
-      companiesMap.set(license.company, companiesMap.size)
-    }
-  })
-
-  // Создаем расширенные объекты для диаграммы
-  return licenses.map((license, index) => {
-    // Преобразуем строку даты в объект Date
+  // Формируем расширенные данные для диаграммы
+  return sortedLicenses.map((license, index) => {
     const endDate = new Date(license.date)
 
-    // Для демонстрации делаем лицензию длительностью 1 год от даты окончания
+    // Рассчитываем дату начала (3 месяца до окончания)
     const startDate = new Date(endDate)
-    startDate.setFullYear(startDate.getFullYear() - 1)
+    startDate.setMonth(startDate.getMonth() - 3)
+
+    // Рассчитываем позицию по вертикали (20% до 120% с шагом ~3.3% на элемент)
+    const position = 20 + (index * 100) / (sortedLicenses.length > 1 ? sortedLicenses.length - 1 : 1)
 
     // Определяем статус лицензии
     const now = new Date()
-    let status: 'active' | 'expired' | 'pending' = 'active'
+    let status: 'active' | 'expired' | 'renewal'
 
     if (endDate < now) {
       status = 'expired'
     }
     else if (endDate.getTime() - now.getTime() < 30 * 24 * 60 * 60 * 1000) {
-      // Если до окончания меньше 30 дней
-      status = 'pending'
+      status = 'renewal' // Если до истечения меньше 30 дней
     }
-
-    // Вычисляем прогресс (сколько процентов времени прошло)
-    const totalDuration = endDate.getTime() - startDate.getTime()
-    const elapsedDuration = Math.min(
-      now.getTime() - startDate.getTime(),
-      totalDuration,
-    )
-    const progress = Math.max(0, Math.min(100, (elapsedDuration / totalDuration) * 100))
+    else {
+      status = 'active'
+    }
 
     return {
       ...license,
       id: `license-${index}`,
       startDate,
       endDate,
-      lane: companiesMap.get(license.company) || 0,
-      progress,
+      position,
       status,
     }
   })
 }
 
 /**
- * Определяет оптимальный масштаб времени на основе выбранного диапазона дат
+ * Определяет детализацию дат на основе выбранного временного диапазона
  * @param startDate Начальная дата диапазона
  * @param endDate Конечная дата диапазона
- * @returns Оптимальный масштаб времени
+ * @returns Уровень детализации дат
  */
-export function determineTimeScale(startDate: Date, endDate: Date): TimeScale {
-  const durationMs = endDate.getTime() - startDate.getTime()
-  const durationDays = durationMs / (1000 * 60 * 60 * 24)
+export function determineDateGranularity(startDate: Date, endDate: Date): DateGranularity {
+  const diffInDays = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
 
-  if (durationDays > 365) {
-    return TimeScale.YEAR
+  if (diffInDays <= 14) {
+    return 'day'
   }
-  else if (durationDays > 120) {
-    return TimeScale.QUARTER
+  else if (diffInDays <= 60) {
+    return 'week'
   }
-  else if (durationDays > 30) {
-    return TimeScale.MONTH
+  else if (diffInDays <= 365) {
+    return 'month'
   }
-  else if (durationDays > 7) {
-    return TimeScale.WEEK
+  else if (diffInDays <= 730) { // ~2 года
+    return 'quarter'
   }
   else {
-    return TimeScale.DAY
+    return 'year'
   }
 }
 
 /**
- * Генерирует отметки времени для шкалы в зависимости от масштаба
- * @param startDate Начальная дата диапазона
- * @param endDate Конечная дата диапазона
- * @param scale Масштаб времени
- * @returns Массив меток времени
- */
-export function generateTimeTicksForScale(startDate: Date, endDate: Date, scale: TimeScale): Date[] {
-  switch (scale) {
-    case TimeScale.YEAR:
-      return d3.timeYear.range(
-        d3.timeYear.floor(startDate),
-        d3.timeYear.ceil(endDate),
-      )
-    case TimeScale.QUARTER:
-      return d3.timeMonth.range(
-        d3.timeMonth.floor(startDate),
-        d3.timeMonth.ceil(endDate),
-        3,
-      )
-    case TimeScale.MONTH:
-      return d3.timeMonth.range(
-        d3.timeMonth.floor(startDate),
-        d3.timeMonth.ceil(endDate),
-      )
-    case TimeScale.WEEK:
-      return d3.timeWeek.range(
-        d3.timeWeek.floor(startDate),
-        d3.timeWeek.ceil(endDate),
-      )
-    case TimeScale.DAY:
-      return d3.timeDay.range(
-        d3.timeDay.floor(startDate),
-        d3.timeDay.ceil(endDate),
-      )
-    default:
-      return d3.timeMonth.range(
-        d3.timeMonth.floor(startDate),
-        d3.timeMonth.ceil(endDate),
-      )
-  }
-}
-
-/**
- * Форматирует дату в зависимости от масштаба времени
+ * Форматирует даты на основе выбранной детализации
  * @param date Дата для форматирования
- * @param scale Масштаб времени
+ * @param granularity Уровень детализации
+ * @param isShort Флаг для краткого формата (опционально)
  * @returns Отформатированная строка даты
  */
-export function formatDateForScale(date: Date, scale: TimeScale): string {
-  const formatters = {
-    [TimeScale.YEAR]: d3.timeFormat('%Y'),
-    [TimeScale.QUARTER]: (d: Date) => {
-      const quarter = Math.floor(d.getMonth() / 3) + 1
-      return `Q${quarter} ${d.getFullYear()}`
-    },
-    [TimeScale.MONTH]: d3.timeFormat('%b %Y'),
-    [TimeScale.WEEK]: (d: Date) => {
-      const weekNumber = d3.timeWeek.count(d3.timeYear(d), d)
-      return `W${weekNumber} ${d3.timeFormat('%b')(d)}`
-    },
-    [TimeScale.DAY]: d3.timeFormat('%d.%m'),
-  }
+export function formatDateByGranularity(date: Date, granularity: DateGranularity, isShort: boolean = false): string {
+  const months = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь']
+  const shortMonths = ['янв', 'фев', 'март', 'апр', 'май', 'июнь', 'июль', 'авг', 'сен', 'окт', 'ноя', 'дек']
 
-  return formatters[scale](date)
+  const monthName = isShort ? shortMonths[date.getMonth()] : months[date.getMonth()]
+  const day = date.getDate()
+  const year = date.getFullYear()
+
+  switch (granularity) {
+    case 'day':
+      return `${day} ${monthName}`
+    case 'week':
+      // Получаем номер недели в году
+      const firstDayOfYear = new Date(date.getFullYear(), 0, 1)
+      const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000
+      const weekNumber = Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7)
+      return isShort ? `W${weekNumber}` : `Неделя ${weekNumber}, ${monthName}`
+    case 'month':
+      return isShort ? monthName : `${monthName} ${year}`
+    case 'quarter':
+      const quarter = Math.floor(date.getMonth() / 3) + 1
+      return isShort ? `Q${quarter}` : `Q${quarter} ${year}`
+    case 'year':
+      return year.toString()
+    default:
+      return date.toLocaleDateString('ru-RU')
+  }
 }
 
 /**
- * Преобразует состояние кисти в параметры диапазона дат
- * @param brushState Состояние кисти
- * @param config Конфигурация диаграммы
- * @param xScale Масштаб по оси X
- * @param yScale Масштаб по оси Y
- * @returns Объект с параметрами диапазона
+ * Генерирует тики для временной оси на основе детализации
+ * @param startDate Начальная дата диапазона
+ * @param endDate Конечная дата диапазона
+ * @param granularity Уровень детализации
+ * @returns Массив дат для тиков оси
  */
-export function brushStateToParams(
-  brushState: BrushState,
-) {
-  const result: { dateRange?: [Date, Date], laneRange?: [number, number] } = {}
-
-  if (brushState.horizontal) {
-    result.dateRange = brushState.horizontal
+export function generateTimeAxisTicks(startDate: Date, endDate: Date, granularity: DateGranularity): Date[] {
+  switch (granularity) {
+    case 'day':
+      return d3.timeDay.range(startDate, endDate)
+    case 'week':
+      return d3.timeWeek.range(startDate, endDate)
+    case 'month':
+      return d3.timeMonth.range(startDate, endDate)
+    case 'quarter':
+      // Для кварталов используем месяцы, но будем фильтровать только начала кварталов
+      return d3.timeMonth.range(startDate, endDate)
+        .filter(d => d.getMonth() % 3 === 0)
+    case 'year':
+      return d3.timeYear.range(startDate, endDate)
+    default:
+      return d3.timeMonth.range(startDate, endDate)
   }
+}
 
-  if (brushState.vertical) {
-    result.laneRange = brushState.vertical
+/**
+ * Генерирует тики для всех уровней детализации
+ * @param startDate Начальная дата диапазона
+ * @param endDate Конечная дата диапазона
+ * @returns Объект с массивами дат для разных уровней детализации
+ */
+export function generateAllTimeTicks(startDate: Date, endDate: Date) {
+  return {
+    days: d3.timeDay.range(startDate, endDate),
+    weeks: d3.timeWeek.range(startDate, endDate),
+    months: d3.timeMonth.range(startDate, endDate),
+    quarters: d3.timeMonth.range(startDate, endDate).filter(d => d.getMonth() % 3 === 0),
+    years: d3.timeYear.range(startDate, endDate),
+  }
+}
+
+/**
+ * Проверяет, является ли дата первым днём периода (месяца, квартала, года и т.д.)
+ * @param date Проверяемая дата
+ * @param granularity Уровень детализации
+ * @returns true, если дата является первым днём периода
+ */
+export function isFirstDayOfPeriod(date: Date, granularity: DateGranularity): boolean {
+  switch (granularity) {
+    case 'day':
+      return true // Каждый день является первым днём для детализации по дням
+    case 'week':
+      return date.getDay() === 1 // Понедельник как первый день недели
+    case 'month':
+      return date.getDate() === 1 // Первое число месяца
+    case 'quarter':
+      return date.getDate() === 1 && date.getMonth() % 3 === 0
+    case 'year':
+      return date.getDate() === 1 && date.getMonth() === 0
+    default:
+      return false
+  }
+}
+
+/**
+ * Снимает дату до начала заданного периода (месяц, квартал, год)
+ * @param date Исходная дата
+ * @param granularity Уровень детализации
+ * @returns Новая дата, соответствующая началу периода
+ */
+export function getStartOfPeriod(date: Date, granularity: DateGranularity): Date {
+  const result = new Date(date)
+
+  switch (granularity) {
+    case 'day':
+      result.setHours(0, 0, 0, 0)
+      break
+    case 'week':
+      const day = result.getDay()
+      const diff = result.getDate() - day + (day === 0 ? -6 : 1) // корректировка для недели, начинающейся с понедельника
+      result.setDate(diff)
+      result.setHours(0, 0, 0, 0)
+      break
+    case 'month':
+      result.setDate(1)
+      result.setHours(0, 0, 0, 0)
+      break
+    case 'quarter':
+      const quarter = Math.floor(result.getMonth() / 3)
+      result.setMonth(quarter * 3, 1)
+      result.setHours(0, 0, 0, 0)
+      break
+    case 'year':
+      result.setMonth(0, 1)
+      result.setHours(0, 0, 0, 0)
+      break
   }
 
   return result
 }
 
 /**
- * Получает цвет для лицензии в зависимости от её статуса
- * @param status Статус лицензии
- * @returns Строка с цветом
+ * Получает конец периода для заданной даты
+ * @param date Исходная дата
+ * @param granularity Уровень детализации
+ * @returns Новая дата, соответствующая концу периода
  */
-export function getLicenseColor(status?: 'active' | 'expired' | 'pending'): string {
-  switch (status) {
-    case 'active':
-      return '#4285F4'
-    case 'expired':
-      return '#EA4335'
-    case 'pending':
-      return '#FBBC05'
-    default:
-      return '#4285F4'
-  }
-}
+export function getEndOfPeriod(date: Date, granularity: DateGranularity): Date {
+  const start = getStartOfPeriod(date, granularity)
+  const result = new Date(start)
 
-/**
- * Проверяет перекрытие двух лицензий
- * @param a Первая лицензия
- * @param b Вторая лицензия
- * @returns true если лицензии перекрываются
- */
-export function doLicensesOverlap(a: LicenseItem, b: LicenseItem): boolean {
-  return a.startDate < b.endDate && a.endDate > b.startDate
-}
-
-/**
- * Оптимизирует размещение лицензий на диаграмме, распределяя их по дорожкам
- * @param licenses Массив лицензий
- * @returns Массив лицензий с оптимизированными дорожками
- */
-export function optimizeLicenseLayout(licenses: LicenseItem[]): LicenseItem[] {
-  const sortedLicenses = [...licenses].sort((a, b) =>
-    a.startDate.getTime() - b.startDate.getTime(),
-  )
-
-  const lanes: LicenseItem[][] = []
-
-  for (const license of sortedLicenses) {
-    let placed = false
-    for (let i = 0; i < lanes.length; i++) {
-      const lane = lanes[i]
-      const canPlaceInLane = lane.every(existingLicense =>
-        !doLicensesOverlap(license, existingLicense),
-      )
-
-      if (canPlaceInLane) {
-        lane.push(license)
-        license.lane = i
-        placed = true
-        break
-      }
-    }
-
-    if (!placed) {
-      lanes.push([license])
-      license.lane = lanes.length - 1
-    }
+  switch (granularity) {
+    case 'day':
+      result.setDate(result.getDate() + 1)
+      break
+    case 'week':
+      result.setDate(result.getDate() + 7)
+      break
+    case 'month':
+      result.setMonth(result.getMonth() + 1)
+      break
+    case 'quarter':
+      result.setMonth(result.getMonth() + 3)
+      break
+    case 'year':
+      result.setFullYear(result.getFullYear() + 1)
+      break
   }
 
-  return sortedLicenses
+  result.setMilliseconds(result.getMilliseconds() - 1)
+  return result
 }

@@ -1,66 +1,51 @@
+/**
+ * Интерфейс для данных лицензии
+ */
 export interface License {
   title: string // Идентификатор лицензии
   company: string // Название компании
-  date: string // Дата окончания лицензии в формате ISO
+  date: string // Дата окончания лицензии в формате YYYY-MM-DD
   amount: number // Количество лицензий
 }
 
+/**
+ * Интерфейс для ответа API с лицензиями
+ */
 export interface LicensesData {
   licenses: License[]
 }
 
-// Расширенная информация о лицензии для отображения на диаграмме
-export interface LicenseItem extends License {
-  id: string // Уникальный идентификатор для React
-  startDate: Date // Дата начала действия лицензии
-  endDate: Date // Дата окончания действия лицензии
-  lane: number // Позиция на вертикальной оси (строка)
-  progress?: number // Процент выполнения (0-100)
-  status?: 'active' | 'expired' | 'pending' // Статус лицензии
+/**
+ * Расширенный интерфейс лицензии для внутреннего использования в компоненте
+ * с дополнительными полями для отображения на диаграмме
+ */
+export interface ExtendedLicense extends License {
+  id: string // Уникальный идентификатор для React key
+  startDate: Date // Дата начала отображения на диаграмме
+  endDate: Date // Дата окончания отображения на диаграмме
+  position: number // Позиция по вертикали (процент)
+  status: 'active' | 'expired' | 'renewal' // Статус лицензии
 }
 
-// Параметры фильтрации
-export interface FilterParams {
-  startDate?: Date
-  endDate?: Date
-  client?: string
-  licenseType?: string
-}
-
-// Настройки отображения диаграммы
+/**
+ * Интерфейс для настроек диаграммы
+ */
 export interface GanttChartConfig {
-  width: number
-  height: number
-  margin: {
+  width: number // Ширина диаграммы
+  height: number // Высота диаграммы
+  margin: { // Отступы диаграммы
     top: number
     right: number
     bottom: number
     left: number
   }
-  itemHeight: number
-  itemMargin: number
-  minZoom: number
-  maxZoom: number
+  barHeight: number // Высота элемента лицензии
+  barPadding: number // Отступ между элементами
+  brushHeight: number // Высота горизонтального brush
+  vBrushWidth: number // Ширина вертикального brush
 }
 
-// Уровни детализации временной шкалы
-export enum TimeScale {
-  YEAR = 'year',
-  QUARTER = 'quarter',
-  MONTH = 'month',
-  WEEK = 'week',
-  DAY = 'day',
-}
-
-// Состояние кисти выбора (brush)
-export interface BrushState {
-  horizontal: [Date, Date] | null
-  vertical: [number, number] | null
-}
-
-// События диаграммы
-export interface GanttChartEvents {
-  onLicenseClick?: (license: LicenseItem) => void
-  onBrushEnd?: (brushState: BrushState) => void
-  onZoom?: (scale: number, translate: [number, number]) => void
-}
+/**
+ * Тип для определения уровня детализации дат
+ */
+export type DateGranularity = 'year' | 'quarter' | 'month' | 'week' | 'day'
