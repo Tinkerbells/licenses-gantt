@@ -4,12 +4,11 @@ import type {
   BrushState,
   GanttChartConfig,
   LicenseItem,
+  TimeScale,
 } from '../../types/license.types'
 
 import {
-  TimeScale,
-} from '../../types/license.types'
-import {
+  determineTimeScale,
   formatDateForScale,
   generateTimeTicksForScale,
   getLicenseColor,
@@ -44,8 +43,8 @@ export function renderGanttChart(
   licenseItems: LicenseItem[],
   config: GanttChartConfig,
   timeScale: TimeScale,
-  onBrushChange: (brushState: BrushState) => void,
   onLicenseClick: (license: LicenseItem) => void,
+  onBrushChange?: (brushState: BrushState) => void,
 ): void {
   // Очищаем содержимое SVG перед рендерингом
   const svg = d3.select(svgElement).html('')
@@ -92,7 +91,7 @@ export function renderGanttChart(
 
   const miniChart = svg.append('g')
     .attr('class', SELECTORS.MINI_CHART)
-    .attr('transform', `translate(0, ${mainHeight + margin.top})`)
+    // .attr('transform', `translate(0, ${mainHeight + margin.top})`)
 
   // Клиппинг для основной области диаграммы
   svg.append('defs').append('clipPath').attr('id', 'clip-main').append('rect').attr('x', margin.left).attr('y', margin.top).attr('width', width - margin.left - margin.right).attr('height', mainHeight - margin.top)
@@ -147,24 +146,25 @@ export function renderGanttChart(
     .attr('fill', '#333')
     .attr('font-size', '12px')
 
-  // Рисуем ось Y (проценты)
+  // Рисуем ось Y (названия компаний)
   const yAxis = mainChart.append('g')
     .attr('class', SELECTORS.Y_AXIS)
     .attr('transform', `translate(${margin.left}, 0)`)
 
-  // Метки процентов
-  const percentages = [0, 20, 40, 60, 80, 100, 120, 140]
+  // Собираем уникальные компании
+  const uniqueCompanies = Array.from(new Set(licenseItems.map(item => item.company)))
 
-  yAxis.selectAll('.percent-tick')
-    .data(percentages)
+  // Метки компаний
+  yAxis.selectAll('.company-label')
+    .data(uniqueCompanies)
     .enter()
     .append('text')
-    .attr('class', 'percent-tick')
+    .attr('class', 'company-label')
     .attr('x', -5)
-    .attr('y', d => margin.top + (mainHeight - margin.top) * (d / 140))
+    .attr('y', (d, i) => yScale(i + 0.5))
     .attr('text-anchor', 'end')
     .attr('alignment-baseline', 'middle')
-    .text(d => `${d}%`)
+    .text(d => d)
     .attr('fill', '#333')
     .attr('font-size', '12px')
 
@@ -210,7 +210,7 @@ export function renderGanttChart(
 
   // Прямоугольники лицензий
   licenseBars.append('rect')
-    .attr('width', d => Math.max(0, xScale(d.endDate) - xScale(d.startDate)))
+    .attr('width', d => Math.max(2, xScale(d.endDate) - xScale(d.startDate))) // Минимальная ширина 2px для видимости
     .attr('height', config.itemHeight)
     .attr('rx', 4)
     .attr('ry', 4)
@@ -224,7 +224,7 @@ export function renderGanttChart(
     .attr('y', config.itemHeight / 2 + 5)
     .attr('fill', '#fff')
     .attr('font-size', '12px')
-    .text(d => `${d.company} (${d.amount} шт.)`)
+    .text(d => `${d.title} (${d.amount} шт.)`)
 
   // Группа для элементов мини-диаграммы
   const miniItems = miniChart.append('g')
@@ -238,7 +238,7 @@ export function renderGanttChart(
     .attr('class', 'mini-license-item')
     .attr('x', d => xScaleMini(d.startDate))
     .attr('y', d => yScaleMini(d.lane) + 2)
-    .attr('width', d => Math.max(0, xScaleMini(d.endDate) - xScaleMini(d.startDate)))
+    .attr('width', d => Math.max(2, xScaleMini(d.endDate) - xScaleMini(d.startDate)))
     .attr('height', 6)
     .attr('rx', 2)
     .attr('ry', 2)
@@ -283,45 +283,26 @@ export function renderGanttChart(
     .attr('stroke', '#6e6e6e')
     .attr('shape-rendering', 'crispEdges')
 
-  // Добавляем область для зума и перемещения
-  // const zoom = d3.zoom<SVGRectElement, unknown>()
-  //   .scaleExtent([config.minZoom, config.maxZoom])
-  //   .on('zoom', zoomed)
-
-  // const zoomRect = mainChart.append('rect')
-  //   .attr('class', SELECTORS.ZOOM_RECT)
-  //   .attr('width', width - margin.left - margin.right)
-  //   .attr('height', mainHeight - margin.top)
-  //   .attr('x', margin.left)
-  //   .attr('y', margin.top)
-  //   .attr('fill', 'none')
-  //   .attr('pointer-events', 'all')
-  //   .call(zoom)
-
-  // Обработчик события зума
-  // function zoomed(event: d3.D3ZoomEvent<SVGRectElement, unknown>) {
-  //   // Трансформация для основной диаграммы
-  //   const transform = event.transform
+  // Задаем начальное положение кистей если оно передано
+  // if (onBrushChange) {
+  //   // Получаем текущий BrushState из React-компонента
+  //   const currentState: BrushState = {
+  //     horizontal: null,
+  //     vertical: null,
+  //   }
   //
-  //   // Обновляем масштаб X
-  //   const newXScale = transform.rescaleX(xScale)
+  //   // Если есть выбор по горизонтали, устанавливаем его
+  //   if (currentState.horizontal) {
+  //     xBrushGroup.call(xBrush.move, currentState.horizontal.map(xScaleMini))
+  //   }
   //
-  //   // Перерисовываем только необходимые элементы
-  //   mainItems.attr('transform', `translate(${transform.x}, 0) scale(${transform.k}, 1)`)
-  //
-  //   // Обновляем оси
-  //   gridLines.selectAll('.time-line')
-  //     .attr('x1', d => newXScale(d))
-  //     .attr('x2', d => newXScale(d))
-  //
-  //   xAxis.selectAll('.time-tick')
-  //     .attr('x', d => newXScale(d))
-  //
-  //   // Обновляем линию текущей даты
-  //   mainChart.select(`.${SELECTORS.TODAY_LINE}`)
-  //     .attr('x1', newXScale(today))
-  //     .attr('x2', newXScale(today))
+  //   // Если есть выбор по вертикали, устанавливаем его
+  //   if (currentState.vertical) {
+  //     yBrushGroup.call(yBrush.move, currentState.vertical.map(yScale))
+  //   }
   // }
+
+  // Добавляем область для зума и перемещения
 
   // Обработчик события горизонтальной кисти
   function brushed(event: d3.D3BrushEvent<unknown>) {
@@ -340,7 +321,7 @@ export function renderGanttChart(
         vertical: null, // Сохраняем вертикальную кисть без изменений
       }
 
-      onBrushChange(newBrushState)
+      onBrushChange?.(newBrushState)
 
       // Обновляем масштаб основной диаграммы
       xScale.domain([x0, x1])
@@ -373,7 +354,7 @@ export function renderGanttChart(
         .attr('transform', d => `translate(${xScale(d.startDate)}, ${yScale(d.lane) + 5})`)
 
       licenseBars.select('rect')
-        .attr('width', d => Math.max(0, xScale(d.endDate) - xScale(d.startDate)))
+        .attr('width', d => Math.max(2, xScale(d.endDate) - xScale(d.startDate)))
 
       // Обновляем сетку
       gridLines.selectAll('.time-line').remove()
@@ -391,6 +372,18 @@ export function renderGanttChart(
         .attr('y2', mainHeight)
         .attr('stroke', '#e0e0e0')
         .attr('stroke-width', 1)
+
+      // Обновляем линию текущей даты
+      if (today >= x0 && today <= x1) {
+        mainChart.select(`.${SELECTORS.TODAY_LINE}`)
+          .attr('x1', xScale(today))
+          .attr('x2', xScale(today))
+          .attr('visibility', 'visible')
+      }
+      else {
+        mainChart.select(`.${SELECTORS.TODAY_LINE}`)
+          .attr('visibility', 'hidden')
+      }
     }
   }
 
@@ -408,13 +401,13 @@ export function renderGanttChart(
       // Обновляем состояние кисти
       const newBrushState: BrushState = {
         horizontal: null, // Сохраняем горизонтальную кисть без изменений
-        vertical: [y0, y1],
+        vertical: [Math.max(0, Math.floor(y0)), Math.min(maxLane + 1, Math.ceil(y1))],
       }
 
-      onBrushChange(newBrushState)
+      onBrushChange?.(newBrushState)
 
       // Обновляем масштаб основной диаграммы
-      yScale.domain([y0, y1])
+      yScale.domain([Math.max(0, Math.floor(y0)), Math.min(maxLane + 1, Math.ceil(y1))])
 
       // Обновляем позиции элементов
       licenseBars
@@ -434,33 +427,27 @@ export function renderGanttChart(
         .attr('y2', d => yScale(d))
         .attr('stroke', '#e0e0e0')
         .attr('stroke-width', 1)
-    }
-  }
 
-  /**
-   * Определяет оптимальный масштаб времени на основе выбранного диапазона дат
-   * @param startDate Начальная дата диапазона
-   * @param endDate Конечная дата диапазона
-   * @returns Оптимальный масштаб времени
-   */
-  function determineTimeScale(startDate: Date, endDate: Date): TimeScale {
-    const durationMs = endDate.getTime() - startDate.getTime()
-    const durationDays = durationMs / (1000 * 60 * 60 * 24)
+      // Обновляем метки компаний
+      yAxis.selectAll('.company-label').remove()
 
-    if (durationDays > 365) {
-      return TimeScale.YEAR
-    }
-    else if (durationDays > 120) {
-      return TimeScale.QUARTER
-    }
-    else if (durationDays > 30) {
-      return TimeScale.MONTH
-    }
-    else if (durationDays > 7) {
-      return TimeScale.WEEK
-    }
-    else {
-      return TimeScale.DAY
+      // Фильтруем только компании, которые видны в текущем диапазоне
+      const visibleCompanies = uniqueCompanies.filter((_, i) =>
+        i >= Math.floor(y0) && i < Math.ceil(y1),
+      )
+
+      yAxis.selectAll('.company-label')
+        .data(visibleCompanies)
+        .enter()
+        .append('text')
+        .attr('class', 'company-label')
+        .attr('x', -5)
+        .attr('y', (d, i) => yScale(Math.floor(y0) + i + 0.5))
+        .attr('text-anchor', 'end')
+        .attr('alignment-baseline', 'middle')
+        .text(d => d)
+        .attr('fill', '#333')
+        .attr('font-size', '12px')
     }
   }
 }

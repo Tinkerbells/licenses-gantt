@@ -30,6 +30,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
   width = 1200,
   height = 600,
   onLicenseSelect,
+  onExport,
 }) => {
   // Refs для элементов DOM
   const chartContainerRef = useRef<HTMLDivElement>(null)
@@ -37,18 +38,19 @@ export const GanttChart: React.FC<GanttChartProps> = ({
 
   // Состояние компонента
   const [licenseItems, setLicenseItems] = useState<LicenseItem[]>([])
-  const [filterParams] = useState<FilterParams>({
+  const [filterParams, setFilterParams] = useState<FilterParams>({
     startDate: initialStartDate,
     endDate: initialEndDate,
     client: initialClient,
     licenseType: initialLicenseType,
   })
-  const [loading, setLoading] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(true)
   const [timeScale, setTimeScale] = useState<TimeScale>(TimeScale.MONTH)
   const [brushState, setBrushState] = useState<BrushState>({
     horizontal: null,
     vertical: null,
   })
+
   // Конфигурация диаграммы
   const config: GanttChartConfig = {
     width,
@@ -67,7 +69,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
 
   // Загрузка данных с сервера
   useEffect(() => {
-  // Загрузка данных лицензий
+    // Загрузка данных лицензий
     const loadLicenseData = async () => {
       try {
         setLoading(true)
@@ -110,23 +112,32 @@ export const GanttChart: React.FC<GanttChartProps> = ({
         setLoading(false)
       }
     }
+
     loadLicenseData()
   }, [filterParams])
 
   // Обработчик изменения кисти
   const handleBrushChange = (newBrushState: BrushState) => {
-    setBrushState(newBrushState)
+    setBrushState((prevState) => {
+      // Объединяем с предыдущим состоянием, чтобы не терять информацию о другой кисти
+      const mergedState = {
+        horizontal: newBrushState.horizontal !== null ? newBrushState.horizontal : prevState.horizontal,
+        vertical: newBrushState.vertical !== null ? newBrushState.vertical : prevState.vertical,
+      }
 
-    // Если изменился горизонтальный диапазон, обновим масштаб времени
-    if (
-      newBrushState.horizontal
-      && (!brushState.horizontal
-        || newBrushState.horizontal[0].getTime() !== brushState.horizontal[0].getTime()
-        || newBrushState.horizontal[1].getTime() !== brushState.horizontal[1].getTime()
-      )
-    ) {
-      setTimeScale(determineTimeScale(newBrushState.horizontal[0], newBrushState.horizontal[1]))
-    }
+      // Если изменился горизонтальный диапазон, обновим масштаб времени
+      if (
+        newBrushState.horizontal
+        && (!prevState.horizontal
+          || newBrushState.horizontal[0].getTime() !== prevState.horizontal[0].getTime()
+          || newBrushState.horizontal[1].getTime() !== prevState.horizontal[1].getTime()
+        )
+      ) {
+        setTimeScale(determineTimeScale(newBrushState.horizontal[0], newBrushState.horizontal[1]))
+      }
+
+      return mergedState
+    })
   }
 
   // Обработчик клика по лицензии
@@ -134,6 +145,21 @@ export const GanttChart: React.FC<GanttChartProps> = ({
     if (onLicenseSelect) {
       onLicenseSelect(license)
     }
+  }
+
+  // Обработчик экспорта
+  const handleExport = () => {
+    if (onExport) {
+      onExport()
+    }
+  }
+
+  // Обработчик изменения фильтров
+  const handleFilterChange = (newFilters: Partial<FilterParams>) => {
+    setFilterParams(prev => ({
+      ...prev,
+      ...newFilters,
+    }))
   }
 
   // Рендеринг диаграммы при изменении данных
@@ -148,14 +174,56 @@ export const GanttChart: React.FC<GanttChartProps> = ({
         handleLicenseClick,
       )
     }
-  }, [licenseItems, timeScale, config.width, config.height])
+  }, [licenseItems, timeScale, brushState, config.width, config.height])
 
   return (
-    <div className="gantt-chart-container">
-      <div
-        ref={chartContainerRef}
-        className={`gantt-chart-view ${loading ? 'loading' : ''}`}
-      >
+    <div className="gantt-chart-container" ref={chartContainerRef}>
+      <div className="gantt-header">
+        <h2 className="gantt-title">Диаграмма лицензий</h2>
+
+        <div className="gantt-filters">
+          <div className="filter-group">
+            <label>Период:</label>
+            <input
+              type="date"
+              value={filterParams.startDate?.toISOString().split('T')[0] || ''}
+              onChange={e => handleFilterChange({
+                startDate: e.target.value ? new Date(e.target.value) : undefined,
+              })}
+            />
+            <span className="date-separator">—</span>
+            <input
+              type="date"
+              value={filterParams.endDate?.toISOString().split('T')[0] || ''}
+              onChange={e => handleFilterChange({
+                endDate: e.target.value ? new Date(e.target.value) : undefined,
+              })}
+            />
+          </div>
+
+          <div className="filter-group">
+            <label>Компания:</label>
+            <input
+              type="text"
+              value={filterParams.client || ''}
+              onChange={e => handleFilterChange({ client: e.target.value })}
+              placeholder="Введите название компании"
+            />
+          </div>
+
+          <button className="filter-reset-btn" onClick={() => setFilterParams({})}>
+            Сбросить
+          </button>
+        </div>
+
+        {onExport && (
+          <button className="export-btn" onClick={handleExport}>
+            Экспорт
+          </button>
+        )}
+      </div>
+
+      <div className={`gantt-chart-view ${loading ? 'loading' : ''}`}>
         {loading && <div className="loading-indicator">Загрузка...</div>}
         <svg
           ref={svgRef}
@@ -163,7 +231,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
           height={config.height}
           className="gantt-svg"
         >
-          {/* D3 будет рендерить здесь */}
+          {/* D3 рендеринг происходит здесь */}
         </svg>
       </div>
     </div>
