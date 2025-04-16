@@ -32,11 +32,11 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
   const config: GanttChartConfig = {
     width: dimensions.width,
     height: dimensions.height,
-    margin: { top: 50, right: 30, bottom: 100, left: 80 },
+    margin: { top: 50, right: 30, bottom: 100, left: 100 },
     barHeight: 30,
     barPadding: 10,
-    brushHeight: 50,
-    vBrushWidth: 20,
+    brushHeight: 40,
+    vBrushWidth: 40,
   }
 
   // Загрузка данных при монтировании компонента
@@ -86,7 +86,6 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     let axisTicks
     const visibleRange = [axisScale.invert(0), axisScale.invert(innerWidth)]
     const visibleTicks = generateAllTimeTicks(visibleRange[0], visibleRange[1])
-
     switch (granularity) {
       case 'day':
         axisTicks = visibleTicks.days
@@ -117,24 +116,13 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     return newXAxis
   }
 
-  // Рендеринг диаграммы при изменении данных или размеров
-  useEffect(() => {
-    if (!data.length || !chartRef.current)
-      return
-
-    // Очищаем предыдущую диаграмму
-    d3.select(chartRef.current).selectAll('*').remove()
-
-    renderChart()
-  }, [data, dimensions])
-
   // Функция рендеринга диаграммы
   const renderChart = () => {
     if (!chartRef.current || !data.length)
       return
 
     // Настройка размеров и отступов
-    const { width, height, margin, barHeight, barPadding, brushHeight, vBrushWidth } = config
+    const { width, height, margin, barHeight, brushHeight, vBrushWidth } = config
     const innerWidth = width - margin.left - margin.right
     const innerHeight = height - margin.top - margin.bottom
 
@@ -246,22 +234,19 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
       .attr('stroke-dasharray', '3,3')
 
     // В зависимости от текущей детализации, добавляем или скрываем дополнительные линии
-    if (dateGranularity === 'week' || dateGranularity === 'day') {
-      // Добавляем линии для недель
-      gridLinesGroup.append('g')
-        .attr('class', 'week-lines')
-        .selectAll('line')
-        .data(allTimeTicks.weeks)
-        .enter()
-        .append('line')
-        .attr('x1', d => xScale(d))
-        .attr('x2', d => xScale(d))
-        .attr('y1', 0)
-        .attr('y2', innerHeight)
-        .attr('stroke', '#e6e6e6')
-        .attr('stroke-width', 0.8)
-        .attr('stroke-dasharray', '2,2')
-    }
+    gridLinesGroup.append('g')
+      .attr('class', 'week-lines')
+      .selectAll('line')
+      .data(allTimeTicks.weeks)
+      .enter()
+      .append('line')
+      .attr('x1', d => xScale(d))
+      .attr('x2', d => xScale(d))
+      .attr('y1', 0)
+      .attr('y2', innerHeight)
+      .attr('stroke', '#e6e6e6')
+      .attr('stroke-width', 0.8)
+      .attr('stroke-dasharray', '2,2')
 
     if (dateGranularity === 'day') {
       // Добавляем линии для дней
@@ -298,6 +283,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     //   .attr('stroke-dasharray', d => d % 50 === 0 ? 'none' : '3,3') // Для основных линий сплошная, для остальных пунктир
 
     // Добавляем подписи месяцев/кварталов сверху
+    // TODO поправить здесь
     zoomGroup.append('g')
       .attr('class', 'time-labels')
       .attr('transform', 'translate(0, -10)')
@@ -362,47 +348,31 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
       .attr('class', 'license-bar')
 
     // Добавляем названия компаний
-    licenses.append('text')
-      .attr('x', d => xScale(d.startDate) - 10)
-      .attr('y', 5)
-      .attr('text-anchor', 'end')
-      .attr('font-size', '12px')
-      .attr('class', 'company-label')
-      .text(d => d.company)
+    // licenses.append('text')
+    //   .attr('x', d => xScale(d.startDate) - 10)
+    //   .attr('y', 5)
+    //   .attr('text-anchor', 'end')
+    //   .attr('font-size', '12px')
+    //   .attr('class', 'company-label')
+    //   .text(d => d.company)
 
     // Добавляем статус лицензии
     licenses.append('text')
       .attr('x', d => xScale(d.startDate) + 10)
       .attr('y', 5)
-      .attr('font-size', '12px')
       .attr('class', 'status-label')
       .text('Продлена')
 
     // Добавляем метки количества лицензий
-    licenses.append('rect')
-      .attr('x', d => xScale(d.endDate) - 65)
-      .attr('y', -barHeight / 2)
-      .attr('width', 60)
-      .attr('height', barHeight)
-      .attr('rx', 4)
-      .attr('ry', 4)
-      .attr('class', 'amount-bg')
-
     licenses.append('text')
       .attr('x', d => xScale(d.endDate) - 35)
       .attr('y', 5)
       .attr('text-anchor', 'middle')
-      .attr('font-size', '12px')
       .attr('class', 'amount-label')
       .text(d => `${d.amount} шт`)
 
-    // Добавляем стрелку навигации
-    licenses.append('path')
-      .attr('d', 'M0,-6 L8,0 L0,6 Z')
-      .attr('transform', d => `translate(${xScale(d.endDate) - 5}, 0)`)
-      .attr('class', 'nav-arrow')
-
     // Флаги для предотвращения рекурсивных вызовов между zoom и brush
+
     let isZooming = false
     let isBrushing = false
 
@@ -435,8 +405,8 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
       // Обновляем горизонтальную сетку
       zoomGroup.selectAll('.horizontal-grid-lines line')
-        .attr('y1', d => newYScale(d))
-        .attr('y2', d => newYScale(d))
+        .attr('y1', d => newYScale(d as number))
+        .attr('y2', d => newYScale(d as number))
         .attr('x2', innerWidth) // Обновляем ширину линий, чтобы они всегда занимали всю видимую область
 
       // Обновляем метки времени
@@ -496,59 +466,13 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
         // Управляем видимостью линий сетки в зависимости от масштаба
         const showDays = newGranularity === 'day'
-        const showWeeks = newGranularity === 'day' || newGranularity === 'week'
-        const showMonths = true // Всегда показываем месяцы
 
         // Устанавливаем видимость линий
         zoomGroup.selectAll('.day-lines')
           .style('display', showDays ? 'block' : 'none')
 
         zoomGroup.selectAll('.week-lines')
-          .style('display', showWeeks ? 'block' : 'none')
-
-        // Динамически создаем недельные и дневные линии, если их нет и они нужны
-        if ((showWeeks && zoomGroup.select('.week-lines').empty())
-          || (showDays && zoomGroup.select('.day-lines').empty())) {
-          // Получаем текущий видимый диапазон дат
-          const visibleDateRange = [newXScale.invert(0), newXScale.invert(innerWidth)]
-          const allTimeTicks = generateAllTimeTicks(visibleDateRange[0], visibleDateRange[1])
-
-          const gridLinesGroup = zoomGroup.select('.vertical-grid-lines')
-
-          // Создаем недельные линии, если их нет и они нужны
-          if (showWeeks && zoomGroup.select('.week-lines').empty()) {
-            gridLinesGroup.append('g')
-              .attr('class', 'week-lines')
-              .selectAll('line')
-              .data(allTimeTicks.weeks)
-              .enter()
-              .append('line')
-              .attr('x1', d => newXScale(d))
-              .attr('x2', d => newXScale(d))
-              .attr('y1', 0)
-              .attr('y2', innerHeight)
-              .attr('stroke', '#e6e6e6')
-              .attr('stroke-width', 0.8)
-              .attr('stroke-dasharray', '2,2')
-          }
-
-          // Создаем дневные линии, если их нет и они нужны
-          if (showDays && zoomGroup.select('.day-lines').empty()) {
-            gridLinesGroup.append('g')
-              .attr('class', 'day-lines')
-              .selectAll('line')
-              .data(allTimeTicks.days)
-              .enter()
-              .append('line')
-              .attr('x1', d => newXScale(d))
-              .attr('x2', d => newXScale(d))
-              .attr('y1', 0)
-              .attr('y2', innerHeight)
-              .attr('stroke', '#f2f2f2')
-              .attr('stroke-width', 0.5)
-              .attr('stroke-dasharray', '1,2')
-          }
-        }
+          .style('display', 'block')
 
         if (newGranularity !== granularity) {
           setGranularity(newGranularity)
@@ -562,6 +486,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
           if (x0 >= 0 && x1 <= innerWidth && x0 < x1) {
             isBrushing = true
+            // eslint-disable-next-line ts/no-use-before-define
             horizontalBrushGroup.call(horizontalBrush.move, [x0, x1])
             isBrushing = false
           }
@@ -572,6 +497,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
           if (y0 >= 0 && y1 <= innerHeight && y0 < y1) {
             isBrushing = true
+            // eslint-disable-next-line ts/no-use-before-define
             verticalBrushGroup.call(verticalBrush.move, [y0, y1])
             isBrushing = false
           }
@@ -656,17 +582,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
         // Обновляем или создаем метки дат внутри brush
         const selectionRect = horizontalBrushGroup.select('.selection')
-        let dateLabel = selectionRect.select('.brush-date-label')
-
-        if (dateLabel.empty()) {
-          dateLabel = selectionRect.append('text')
-            .attr('class', 'brush-date-label')
-            .attr('text-anchor', 'middle')
-            .attr('fill', '#333')
-            .attr('font-size', '11px')
-            .attr('font-weight', 'bold')
-            .attr('pointer-events', 'none')
-        }
+        const dateLabel = selectionRect.select('.brush-date-label')
 
         // Позиционируем текст даты посередине brush
         const brushWidth = x1 - x0
@@ -699,7 +615,11 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
           const currentTransform = d3.zoomTransform(svg.node()!)
 
           // Устанавливаем зум-трансформацию для синхронизации с brush
+          // eslint-disable-next-line ts/ban-ts-comment
+          // @ts-ignore
           currentTransform.k = innerWidth / (x1 - x0)
+          // eslint-disable-next-line ts/ban-ts-comment
+          // @ts-ignore
           currentTransform.x = -x0 * currentTransform.k
 
           // Применяем трансформацию без вызова обработчика события (чтобы избежать циклических вызовов)
@@ -754,7 +674,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
       .attr('height', innerHeight)
       .attr('class', 'vertical-brush')
       .style('position', 'absolute')
-      .style('left', `${margin.left - vBrushWidth - 10}px`)
+      .style('left', `${margin.left - vBrushWidth - 40}px`)
       .style('top', `${margin.top}px`)
 
     const verticalBrushGroup = verticalBrushSvg.append('g')
@@ -791,8 +711,8 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
         // Дополнительно обновляем горизонтальные линии сетки
         zoomGroup.selectAll('.horizontal-grid-lines line')
-          .attr('y1', d => newYScale(d))
-          .attr('y2', d => newYScale(d))
+          .attr('y1', d => newYScale(d as number))
+          .attr('y2', d => newYScale(d as number))
 
         // Обновляем зум-трансформацию только в конце, чтобы избежать дребезга
         if (event.type === 'end') {
@@ -800,7 +720,11 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
           const currentTransform = d3.zoomTransform(svg.node()!)
 
           // Устанавливаем зум-трансформацию для синхронизации с brush
+          // eslint-disable-next-line ts/ban-ts-comment
+          // @ts-ignore
           currentTransform.k = innerHeight / (y1 - y0)
+          // eslint-disable-next-line ts/ban-ts-comment
+          // @ts-ignore
           currentTransform.y = -y0 * currentTransform.k
 
           // Применяем трансформацию без вызова обработчика события
@@ -852,6 +776,17 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     }
   }
 
+  // Рендеринг диаграммы при изменении данных или размеров
+  useEffect(() => {
+    if (!data.length || !chartRef.current)
+      return
+
+    // Очищаем предыдущую диаграмму
+    d3.select(chartRef.current).selectAll('*').remove()
+
+    renderChart()
+  }, [data, dimensions])
+
   // Рендер загрузки и ошибок
   if (loading) {
     return (
@@ -880,5 +815,3 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     </div>
   )
 }
-
-export default LicenseGanttChart
