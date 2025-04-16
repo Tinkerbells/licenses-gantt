@@ -1,6 +1,6 @@
 import * as d3 from 'd3'
 
-import type { DateGranularity, ExtendedLicense, LicensesApiData } from '../types/license.types'
+import type { DateGranularity, DateGranularityType, ExtendedLicense, LicensesApiData } from '../types/license.types'
 
 import { formatRussianDate } from './locale-utils'
 import { LicenseService } from '../services/license-service'
@@ -20,7 +20,7 @@ export function prepareLicenseData(apiData: LicensesApiData): ExtendedLicense[] 
  * @param endDate Конечная дата диапазона
  * @returns Уровень детализации дат
  */
-export function determineDateGranularity(startDate: Date, endDate: Date): DateGranularity {
+export function determineDateGranularity(startDate: Date, endDate: Date): DateGranularityType {
   const diffInDays = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
 
   if (diffInDays <= 14) {
@@ -47,7 +47,7 @@ export function determineDateGranularity(startDate: Date, endDate: Date): DateGr
  * @param isShort Флаг для краткого формата (опционально)
  * @returns Отформатированная строка даты
  */
-export function formatDateByGranularity(date: Date, granularity: DateGranularity, isShort: boolean = false): string {
+export function formatDateByGranularity(date: Date, granularity: DateGranularityType, isShort: boolean = false): string {
   return formatRussianDate(date, granularity, isShort)
 }
 
@@ -112,6 +112,20 @@ export function groupLicensesByCompany(licenses: ExtendedLicense[]): Record<stri
 }
 
 /**
+ * Форматирует стоимость в виде строки с разделителями тысяч и валютой
+ * @param price Стоимость в числовом формате
+ * @returns Отформатированная строка стоимости
+ */
+export function formatPrice(price: number): string {
+  return new Intl.NumberFormat('ru-RU', {
+    style: 'currency',
+    currency: 'RUB',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(price)
+}
+
+/**
  * Получает статистику по лицензиям
  * @param licenses Массив лицензий
  * @returns Статистика по лицензиям
@@ -137,6 +151,10 @@ export function getLicenseStats(licenses: ExtendedLicense[]) {
     .filter(license => license.status === 'expired')
     .reduce((sum, license) => sum + license.amount, 0)
 
+  // Общая стоимость всех лицензий
+  const totalPrice = licenses
+    .reduce((sum, license) => sum + (license.totalPrice || 0), 0)
+
   // Ближайшие истекающие лицензии
   const upcomingExpirations = licenses
     .filter(license => new Date(license.date) > now)
@@ -148,6 +166,7 @@ export function getLicenseStats(licenses: ExtendedLicense[]) {
     activeLicenses,
     renewalLicenses,
     expiredLicenses,
+    totalPrice,
     upcomingExpirations,
   }
 }
@@ -170,7 +189,8 @@ export function getLicenseSummary(licenses: ExtendedLicense[]): string {
     (new Date(nextExpiration.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24),
   )
 
-  return `Всего лицензий: ${stats.totalLicenses}. `
-    + `Активных: ${stats.activeLicenses}. `
+  return `Всего лицензий: ${stats.totalLicenses} шт. `
+    + `Активных: ${stats.activeLicenses} шт. `
+    + `Общая стоимость: ${formatPrice(stats.totalPrice)}. `
     + `Ближайшее истечение: ${nextExpirationDate} (${nextExpiration.company}, ${nextExpiration.amount} шт, ${daysToExpiration} дн.)`
 }

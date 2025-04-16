@@ -3,10 +3,19 @@ import { useEffect, useRef, useState } from 'react'
 
 import './gantt-chart.styles.css'
 
-import type { DateGranularity, ExtendedLicense } from '@/types/license.types'
+import type { DateGranularity, DateGranularityType, ExtendedLicense } from '@/types/license.types'
 
 import { LicenseService } from '@/services/license-service'
-import { determineDateGranularity, formatDateByGranularity, generateAllTimeTicks, generateTimeAxisTicks, prepareLicenseData } from '@/utils/gantt-utils'
+import {
+  determineDateGranularity,
+  formatDateByGranularity,
+  generateAllTimeTicks,
+  generateTimeAxisTicks,
+  prepareLicenseData,
+} from '@/utils/gantt-utils'
+
+import { GanttHeader } from './gantt-header'
+import { LicenseTooltip } from './license-tooltip'
 
 interface LicenseGanttChartProps {
   width?: number
@@ -26,13 +35,22 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
   const [dimensions, setDimensions] = useState({ width, height })
-  const [granularity, setGranularity] = useState<DateGranularity>('month')
+  const [granularity, setGranularity] = useState<DateGranularityType>('month')
+  const [tooltipInfo, setTooltipInfo] = useState<{
+    license: ExtendedLicense | null
+    position: { x: number, y: number }
+    visible: boolean
+  }>({
+    license: null,
+    position: { x: 0, y: 0 },
+    visible: false,
+  })
 
   // Конфигурация диаграммы
   const config = {
     width: dimensions.width,
     height: dimensions.height,
-    margin: { top: 50, right: 30, bottom: 100, left: 100 },
+    margin: { top: 80, right: 30, bottom: 100, left: 100 },
     barHeight: 30,
     barPadding: 10,
     brushHeight: 40,
@@ -81,7 +99,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
   }, [])
 
   // Функция для обновления оси X при изменении детализации
-  const updateXAxis = (axisScale: d3.ScaleTime<number, number>, granularity: DateGranularity, innerWidth: number) => {
+  const updateXAxis = (axisScale: d3.ScaleTime<number, number>, granularity: DateGranularityType, innerWidth: number) => {
     // Определяем, какие тики использовать в зависимости от детализации
     let axisTicks
     const visibleRange = [axisScale.invert(0), axisScale.invert(innerWidth)]
@@ -121,10 +139,13 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     if (!chartRef.current || !data.length)
       return
 
+    // Очищаем предыдущую диаграмму
+    d3.select(chartRef.current).selectAll('*').remove()
+
     // Настройка размеров и отступов
     const { width, height, margin, barHeight, brushHeight, vBrushWidth } = config
     const innerWidth = width - margin.left - margin.right
-    const innerHeight = height - margin.top - margin.bottom
+    const innerHeight = height - margin.top - margin.bottom - 80 // Отведем место для заголовка
 
     // Определяем временной диапазон для данных
     const minDate = d3.min(data, d => d.startDate) || new Date(2024, 0, 1)
@@ -251,7 +272,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     // Всегда создаем линии для дней, но изначально скрываем, если не в детализации дней
     gridLinesGroup.append('g')
       .attr('class', 'day-lines')
-      .style('display', dateGranularity === 'day' ? 'block' : 'none')
+      .style('display', 'block')
       .selectAll('line')
       .data(allTimeTicks.days)
       .enter()
@@ -306,115 +327,160 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
       .attr('font-size', '10px')
       .attr('fill', '#666')
 
-    // Создаем группу для лицензионных элементов
-    const licenseGroup = zoomGroup.append('g')
-      .attr('class', 'license-items')
+    // Создаем группу для горизонтальных линий сетки
+    const horizontalGridGroup = zoomGroup.append('g')
+      .attr('class', 'horizontal-grid-lines')
 
-    // Отрисовываем лицензии
-    const licenses = licenseGroup.selectAll('.license')
-      .data(data)
+    // Добавляем горизонтальные линии сетки
+    horizontalGridGroup.selectAll('line')
+      .data(yScale.ticks(6))
       .enter()
-      .append('g')
-      .attr('class', d => `license license-${d.status}`)
-      .attr('transform', d => `translate(0,${yScale(d.position)})`)
+      .append('line')
+      .attr('x1', 0)
+      .attr('x2', innerWidth)
+      .attr('y1', d => yScale(d))
+      .attr('y2', d => yScale(d))
+      .attr('stroke', '#e0e0e0')
+      .attr('stroke-width', 0.5)
+      .attr('stroke-dasharray', '3,3')
 
-    // Добавляем прямоугольники для лицензий
-    licenses.append('rect')
-      .attr('x', d => xScale(d.startDate))
-      .attr('y', -barHeight / 2)
-      .attr('width', d => Math.max(50, xScale(d.endDate) - xScale(d.startDate)))
-      .attr('height', barHeight)
-      .attr('rx', 4)
-      .attr('ry', 4)
-      .attr('class', 'license-bar')
+    // Создаем группу для лицензионных элементов с использованием React компонентов
+    const licensesContainer = d3.select(chartRef.current)
+      .append('div')
+      .attr('class', 'licenses-container')
+      .style('position', 'absolute')
+      .style('left', `${margin.left}px`)
+      .style('top', `${margin.top}px`)
+      .style('width', `${innerWidth}px`)
+      .style('height', `${innerHeight}px`)
+      .style('overflow', 'hidden')
+      .style('pointer-events', 'none')
 
-    // Добавляем статус лицензии
-    licenses.append('text')
-      .attr('x', d => xScale(d.startDate) + 10)
-      .attr('y', 5)
-      .attr('class', 'status-label')
-      .text('Продлена')
+    // Отрисовываем лицензии с использованием React компонентов
+    const licensesSvg = licensesContainer.append('svg')
+      .attr('width', innerWidth)
+      .attr('height', innerHeight)
+      .style('overflow', 'visible')
 
-    // Добавляем метки количества лицензий
-    licenses.append('text')
-      .attr('x', d => xScale(d.endDate) - 35)
-      .attr('y', 5)
-      .attr('text-anchor', 'middle')
-      .attr('class', 'amount-label')
-      .text(d => `${d.amount} шт`)
+    // Добавляем текущую дату в виде вертикальной линии
+    const now = new Date()
+    if (now >= adjustedMinDate && now <= adjustedMaxDate) {
+      zoomGroup.append('line')
+        .attr('class', 'current-date-line')
+        .attr('x1', xScale(now))
+        .attr('x2', xScale(now))
+        .attr('y1', 0)
+        .attr('y2', innerHeight)
+        .attr('stroke', '#ff6b6b')
+        .attr('stroke-width', 2)
+        .attr('stroke-dasharray', '5,3')
 
-    // Флаги для предотвращения рекурсивных вызовов между zoom и brush
-    let isZooming = false
-    let isBrushing = false
-
-    // Создаем функцию обновления позиций элементов
-    const updateChartElements = (newXScale: d3.ScaleTime<number, number>, newYScale: d3.ScaleLinear<number, number>) => {
-      // Обновляем оси с новыми шкалами
-      mainGroup.select('.x-axis').call(d3.axisBottom(newXScale) as any)
-      mainGroup.select('.y-axis').call(d3.axisLeft(newYScale) as any)
-
-      // Обновляем вертикальные линии сетки для разных временных периодов
-      zoomGroup.selectAll('.year-lines line')
-        .attr('x1', d => newXScale(d as Date))
-        .attr('x2', d => newXScale(d as Date))
-
-      zoomGroup.selectAll('.quarter-lines line')
-        .attr('x1', d => newXScale(d as Date))
-        .attr('x2', d => newXScale(d as Date))
-
-      zoomGroup.selectAll('.month-lines line')
-        .attr('x1', d => newXScale(d as Date))
-        .attr('x2', d => newXScale(d as Date))
-
-      zoomGroup.selectAll('.week-lines line')
-        .attr('x1', d => newXScale(d as Date))
-        .attr('x2', d => newXScale(d as Date))
-
-      zoomGroup.selectAll('.day-lines line')
-        .attr('x1', d => newXScale(d as Date))
-        .attr('x2', d => newXScale(d as Date))
-
-      // Обновляем горизонтальную сетку
-      zoomGroup.selectAll('.horizontal-grid-lines line')
-        .attr('y1', d => newYScale(d as number))
-        .attr('y2', d => newYScale(d as number))
-        .attr('x2', innerWidth) // Обновляем ширину линий, чтобы они всегда занимали всю видимую область
-
-      // Обновляем метки времени
-      zoomGroup.selectAll('.time-labels text')
-        .attr('x', d => newXScale(d as Date))
-
-      // Обновляем позиции лицензий и их элементов
-      licenseGroup.selectAll('.license')
-        .attr('transform', d => `translate(0,${newYScale((d as ExtendedLicense).position)})`)
-        .each(function (d) {
-          const license = d as ExtendedLicense
-          const g = d3.select(this)
-
-          g.select('rect.license-bar')
-            .attr('x', newXScale(license.startDate))
-            .attr('width', Math.max(50, newXScale(license.endDate) - newXScale(license.startDate)))
-
-          g.select('.company-label')
-            .attr('x', newXScale(license.startDate) - 10)
-
-          g.select('.status-label')
-            .attr('x', newXScale(license.startDate) + 10)
-
-          g.select('.amount-bg')
-            .attr('x', newXScale(license.endDate) - 65)
-
-          g.select('.amount-label')
-            .attr('x', newXScale(license.endDate) - 35)
-
-          g.select('.nav-arrow')
-            .attr('transform', `translate(${newXScale(license.endDate) - 5}, 0)`)
-        })
+      zoomGroup.append('text')
+        .attr('class', 'current-date-label')
+        .attr('x', xScale(now))
+        .attr('y', -30)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '10px')
+        .attr('fill', '#ff6b6b')
+        .text('Сегодня')
     }
 
-    // Определяем поведение зума
+    // Отрисовываем лицензии с использованием компонента LicenseItem
+    data.forEach((license) => {
+      const licenseG = licensesSvg.append('g')
+        .datum(license)
+        .attr('class', 'license-container')
+
+      // Создаем компоненты лицензий с помощью D3
+      const x = xScale(license.startDate)
+      const width = Math.max(50, xScale(license.endDate) - xScale(license.startDate))
+      const yPos = yScale(license.position)
+
+      // Создаем прямоугольник лицензии
+      licenseG.append('rect')
+        .attr('x', x)
+        .attr('y', yPos - barHeight / 2)
+        .attr('width', width)
+        .attr('height', barHeight)
+        .attr('rx', 4)
+        .attr('ry', 4)
+        .attr('class', `license-bar license-${license.status}`)
+        .style('fill', license.status === 'active'
+          ? '#e6f2ff'
+          : license.status === 'expired' ? '#ffe6e6' : '#fff9e6')
+        .style('stroke', license.status === 'active'
+          ? '#a9d1f7'
+          : license.status === 'expired' ? '#ffb3b3' : '#ffd480')
+        .style('cursor', 'pointer')
+        .style('pointer-events', 'all')
+        .on('mouseenter', function (event) {
+          d3.select(this).style('fill-opacity', 0.8)
+          setTooltipInfo({
+            license,
+            position: { x: event.clientX, y: event.clientY },
+            visible: true,
+          })
+        })
+        .on('mousemove', (event) => {
+          setTooltipInfo(prev => ({
+            ...prev,
+            position: { x: event.clientX, y: event.clientY },
+          }))
+        })
+        .on('mouseleave', function () {
+          d3.select(this).style('fill-opacity', 1)
+          setTooltipInfo(prev => ({ ...prev, visible: false }))
+        })
+
+      // Добавляем статус лицензии
+      licenseG.append('text')
+        .attr('x', x + 10)
+        .attr('y', yPos - 5)
+        .attr('class', 'status-label')
+        .style('font-size', '10px')
+        .style('fill', '#666')
+        .style('pointer-events', 'none')
+        .text(license.status === 'active'
+          ? 'Активна'
+          : license.status === 'expired' ? 'Истекла' : 'Требуется продление')
+
+      // Добавляем название лицензии
+      licenseG.append('text')
+        .attr('x', x + 10)
+        .attr('y', yPos + 10)
+        .attr('class', 'license-name')
+        .style('font-size', '10px')
+        .style('font-weight', 'bold')
+        .style('fill', '#444')
+        .style('pointer-events', 'none')
+        .text(license.title)
+
+      // Добавляем количество и цену
+      licenseG.append('text')
+        .attr('x', x + width - 10)
+        .attr('y', yPos - 5)
+        .attr('text-anchor', 'end')
+        .attr('class', 'amount-label')
+        .style('font-size', '10px')
+        .style('fill', '#0078d4')
+        .style('pointer-events', 'none')
+        .text(`${license.amount} шт.`)
+
+      // Добавляем срок лицензии
+      licenseG.append('text')
+        .attr('x', x + width - 10)
+        .attr('y', yPos + 10)
+        .attr('text-anchor', 'end')
+        .attr('class', 'term-label')
+        .style('font-size', '10px')
+        .style('fill', '#666')
+        .style('pointer-events', 'none')
+        .text(license.term || '')
+    })
+
+    // Определяем зум и поведение при зуме
     const zoom = d3.zoom<SVGSVGElement, unknown>()
-      .scaleExtent([0.5, 20]) // Увеличиваем максимальный масштаб до 20x для более детального просмотра
+      .scaleExtent([0.5, 10])
       .extent([[0, 0], [innerWidth, innerHeight]])
       .on('zoom', (event) => {
         if (isBrushing)
@@ -452,31 +518,86 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
           mainGroup.select('.x-axis').call(updatedXAxis as any)
         }
 
-        // Обновляем все элементы с новыми шкалами
-        updateChartElements(newXScale, newYScale)
+        // Обновляем положение элементов
+        zoomGroup.selectAll('.year-lines line')
+          .attr('x1', d => newXScale(d as Date))
+          .attr('x2', d => newXScale(d as Date))
+
+        zoomGroup.selectAll('.quarter-lines line')
+          .attr('x1', d => newXScale(d as Date))
+          .attr('x2', d => newXScale(d as Date))
+
+        zoomGroup.selectAll('.month-lines line')
+          .attr('x1', d => newXScale(d as Date))
+          .attr('x2', d => newXScale(d as Date))
+
+        zoomGroup.selectAll('.week-lines line')
+          .attr('x1', d => newXScale(d as Date))
+          .attr('x2', d => newXScale(d as Date))
+
+        zoomGroup.selectAll('.day-lines line')
+          .attr('x1', d => newXScale(d as Date))
+          .attr('x2', d => newXScale(d as Date))
+
+        zoomGroup.selectAll('.time-labels text')
+          .attr('x', d => newXScale(d as Date))
+
+        zoomGroup.select('.current-date-line')
+          .attr('x1', d => newXScale(now))
+          .attr('x2', d => newXScale(now))
+
+        zoomGroup.select('.current-date-label')
+          .attr('x', d => newXScale(now))
+
+        // Обновляем положение лицензий
+        licensesSvg.selectAll('.license-container').each(function () {
+          const license = d3.select(this).datum() as ExtendedLicense
+          const licenseG = d3.select(this)
+
+          const x = newXScale(license.startDate)
+          const width = Math.max(50, newXScale(license.endDate) - newXScale(license.startDate))
+          const yPos = newYScale(license.position)
+
+          licenseG.select('rect')
+            .attr('x', x)
+            .attr('y', yPos - barHeight / 2)
+            .attr('width', width)
+
+          licenseG.select('.status-label')
+            .attr('x', x + 10)
+            .attr('y', yPos - 5)
+
+          licenseG.select('.license-name')
+            .attr('x', x + 10)
+            .attr('y', yPos + 10)
+
+          licenseG.select('.amount-label')
+            .attr('x', x + width - 10)
+            .attr('y', yPos - 5)
+
+          licenseG.select('.term-label')
+            .attr('x', x + width - 10)
+            .attr('y', yPos + 10)
+        })
 
         // Обновляем положение brushes при завершении зума
-        if (event.sourceEvent && event.sourceEvent.type === 'end' && !isBrushing) {
+        if (event.sourceEvent) {
+          // Обновляем горизонтальный brush с новыми значениями
           const xDomain = newXScale.domain()
-          const x0 = xScale(xDomain[0])
-          const x1 = xScale(xDomain[1])
+          const x0 = brushTimeScale(xDomain[0])
+          const x1 = brushTimeScale(xDomain[1])
 
           if (x0 >= 0 && x1 <= innerWidth && x0 < x1) {
-            isBrushing = true
-            // eslint-disable-next-line ts/no-use-before-define
             horizontalBrushGroup.call(horizontalBrush.move, [x0, x1])
-            isBrushing = false
           }
 
+          // Обновляем вертикальный brush с новыми значениями
           const yDomain = newYScale.domain()
-          const y0 = yScale(yDomain[1])
+          const y0 = yScale(yDomain[1]) // Обратите внимание на инверсию из-за направления оси Y
           const y1 = yScale(yDomain[0])
 
           if (y0 >= 0 && y1 <= innerHeight && y0 < y1) {
-            isBrushing = true
-            // eslint-disable-next-line ts/no-use-before-define
             verticalBrushGroup.call(verticalBrush.move, [y0, y1])
-            isBrushing = false
           }
         }
 
@@ -495,7 +616,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
       .attr('class', 'horizontal-brush')
       .style('position', 'absolute')
       .style('left', `${margin.left}px`)
-      .style('top', `${height - brushHeight - 20}px`)
+      .style('top', `${height - brushHeight - 100}px`)
 
     const horizontalBrushGroup = horizontalBrushSvg.append('g')
 
@@ -538,6 +659,10 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
       .attr('stroke-width', 1)
       .attr('stroke-dasharray', '3,3')
 
+    // Флаги для предотвращения рекурсивных вызовов между zoom и brush
+    let isZooming = false
+    let isBrushing = false
+
     // Создаем горизонтальный brush
     const horizontalBrush = d3.brushX()
       .extent([[0, 0], [innerWidth, brushHeight - 20]])
@@ -559,7 +684,18 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
         // Обновляем или создаем метки дат внутри brush
         const selectionRect = horizontalBrushGroup.select('.selection')
-        const dateLabel = selectionRect.select('.brush-date-label')
+        let dateLabel = selectionRect.select('.brush-date-label')
+
+        // Если метки еще нет, создаем ее
+        if (dateLabel.empty()) {
+          dateLabel = selectionRect.append('text')
+            .attr('class', 'brush-date-label')
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#333')
+            .attr('font-size', '11px')
+            .attr('font-weight', 'bold')
+            .attr('pointer-events', 'none')
+        }
 
         // Позиционируем текст даты посередине brush
         const brushWidth = x1 - x0
@@ -590,7 +726,44 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
         mainGroup.select('.x-axis').call(updatedXAxis as any)
 
         // Обновляем все остальные элементы диаграммы
-        updateChartElements(newXScale, yScale)
+        zoomGroup.selectAll('.vertical-grid-lines line')
+          .each(function () {
+            const line = d3.select(this)
+            const date = line.datum() as Date
+            line.attr('x1', newXScale(date)).attr('x2', newXScale(date))
+          })
+
+        zoomGroup.selectAll('.time-labels text')
+          .each(function () {
+            const text = d3.select(this)
+            const date = text.datum() as Date
+            text.attr('x', newXScale(date))
+          })
+
+        // Обновляем положение лицензий
+        licensesSvg.selectAll('.license-container').each(function () {
+          const license = d3.select(this).datum() as ExtendedLicense
+          const licenseG = d3.select(this)
+
+          const x = newXScale(license.startDate)
+          const width = Math.max(50, newXScale(license.endDate) - newXScale(license.startDate))
+
+          licenseG.select('rect')
+            .attr('x', x)
+            .attr('width', width)
+
+          licenseG.select('.status-label')
+            .attr('x', x + 10)
+
+          licenseG.select('.license-name')
+            .attr('x', x + 10)
+
+          licenseG.select('.amount-label')
+            .attr('x', x + width - 10)
+
+          licenseG.select('.term-label')
+            .attr('x', x + width - 10)
+        })
 
         // Обновляем уровень детализации дат
         if (newGranularity !== granularity) {
@@ -603,22 +776,20 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
           const currentTransform = d3.zoomTransform(svg.node()!)
 
           // Устанавливаем зум-трансформацию для синхронизации с brush
-          // eslint-disable-next-line ts/ban-ts-comment
-          // @ts-ignore
           currentTransform.k = innerWidth / (x1 - x0)
-          // eslint-disable-next-line ts/ban-ts-comment
-          // @ts-ignore
           currentTransform.x = -x0 * currentTransform.k
 
           // Применяем трансформацию без вызова обработчика события (чтобы избежать циклических вызовов)
+          isZooming = true
           svg.call(zoom.transform as any, currentTransform)
+          isZooming = false
         }
 
         isBrushing = false
       })
 
     // Применяем горизонтальный brush и стилизуем его
-    horizontalBrushGroup.call(horizontalBrush as any)
+    horizontalBrushGroup.call(horizontalBrush)
 
     // Стилизуем handles (ручки) brush
     horizontalBrushGroup.selectAll('.handle')
@@ -673,6 +844,8 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
       .attr('height', innerHeight)
       .attr('fill', '#f5f5f5')
       .attr('stroke', '#ddd')
+      .attr('rx', 3)
+      .attr('ry', 3)
 
     // Создаем вертикальный brush для управления зумом
     const verticalBrush = d3.brushY()
@@ -695,12 +868,33 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
         const newYScale = yScale.copy().domain(newYDomain)
 
         // Обновляем все элементы, зависящие от yScale
-        updateChartElements(xScale, newYScale)
-
-        // Дополнительно обновляем горизонтальные линии сетки
+        // Обновляем горизонтальные линии сетки
         zoomGroup.selectAll('.horizontal-grid-lines line')
           .attr('y1', d => newYScale(d as number))
           .attr('y2', d => newYScale(d as number))
+
+        // Обновляем позиции лицензий по вертикали
+        licensesSvg.selectAll('.license-container').each(function () {
+          const license = d3.select(this).datum() as ExtendedLicense
+          const licenseG = d3.select(this)
+
+          const yPos = newYScale(license.position)
+
+          licenseG.select('rect')
+            .attr('y', yPos - barHeight / 2)
+
+          licenseG.select('.status-label')
+            .attr('y', yPos - 5)
+
+          licenseG.select('.license-name')
+            .attr('y', yPos + 10)
+
+          licenseG.select('.amount-label')
+            .attr('y', yPos - 5)
+
+          licenseG.select('.term-label')
+            .attr('y', yPos + 10)
+        })
 
         // Обновляем зум-трансформацию только в конце, чтобы избежать дребезга
         if (event.type === 'end') {
@@ -708,15 +902,13 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
           const currentTransform = d3.zoomTransform(svg.node()!)
 
           // Устанавливаем зум-трансформацию для синхронизации с brush
-          // eslint-disable-next-line ts/ban-ts-comment
-          // @ts-ignore
           currentTransform.k = innerHeight / (y1 - y0)
-          // eslint-disable-next-line ts/ban-ts-comment
-          // @ts-ignore
           currentTransform.y = -y0 * currentTransform.k
 
           // Применяем трансформацию без вызова обработчика события
+          isZooming = true
           svg.call(zoom.transform as any, currentTransform)
+          isZooming = false
         }
 
         isBrushing = false
@@ -736,32 +928,11 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
       .attr('fill', '#cce4f7')
       .attr('stroke', '#0078d4')
       .attr('stroke-width', 1)
+      .attr('rx', 3)
+      .attr('ry', 3)
 
     // Устанавливаем начальную позицию вертикального brush
     verticalBrushGroup.call(verticalBrush.move, [0, innerHeight * 0.6])
-
-    // Добавляем текущую дату в виде вертикальной линии
-    const now = new Date()
-    if (now >= adjustedMinDate && now <= adjustedMaxDate) {
-      zoomGroup.append('line')
-        .attr('class', 'current-date-line')
-        .attr('x1', xScale(now))
-        .attr('x2', xScale(now))
-        .attr('y1', 0)
-        .attr('y2', innerHeight)
-        .attr('stroke', '#ff6b6b')
-        .attr('stroke-width', 2)
-        .attr('stroke-dasharray', '5,3')
-
-      zoomGroup.append('text')
-        .attr('class', 'current-date-label')
-        .attr('x', xScale(now))
-        .attr('y', -30)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '10px')
-        .attr('fill', '#ff6b6b')
-        .text('Сегодня')
-    }
   }
 
   // Рендеринг диаграммы при изменении данных или размеров
@@ -799,7 +970,15 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
   return (
     <div ref={containerRef} className="license-gantt-container">
+      {data.length > 0 && <GanttHeader licenses={data} />}
       <div ref={chartRef} className="license-gantt-chart"></div>
+      <div id="tooltip-container" style={{ position: 'fixed', top: 0, left: 0, zIndex: 9999, pointerEvents: 'none' }}>
+        <LicenseTooltip
+          license={tooltipInfo.license}
+          position={tooltipInfo.position}
+          visible={tooltipInfo.visible}
+        />
+      </div>
     </div>
   )
 }

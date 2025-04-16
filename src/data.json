@@ -1,0 +1,268 @@
+{
+  "licenses": [
+    {
+      "id": 1,
+      "expirationDate": "2024-12-31",
+      "customer": "ООО \"ГАЗПРОМ ТРАНСГАЗ ЕКАТЕРИНБУРГ\"",
+      "articleCode": "Подписка Directum",
+      "licenseName": "",
+      "term": "1 год",
+      "quantity": 1,
+      "unitPrice": 15885928.0,
+      "totalPrice": 15885928.0
+    },
+    {
+      "id": 2,
+      "expirationDate": "2025-05-19",
+      "customer": "ООО \"Газпром добыча Оренбург\"",
+      "articleCode": "Подписка Directum",
+      "licenseName": "",
+      "term": "1 год",
+      "quantity": 1,
+      "unitPrice": 10643968.0,
+      "totalPrice": 10643968.0
+    },
+    {
+      "id": 3,
+      "expirationDate": "2025-10-31",
+      "customer": "ООО \"ГАЗПРОМ ДОБЫЧА ШЕЛЬФ ЮЖНО-САХАЛИНСК\"",
+      "articleCode": "Подписка Directum",
+      "licenseName": "",
+      "term": "1 год",
+      "quantity": 1,
+      "unitPrice": 2660784.0,
+      "totalPrice": 2660784.0
+    },
+    {
+      "id": 4,
+      "expirationDate": "2025-02-27",
+      "customer": "ООО \"ГАЗПРОМ ДОБЫЧА ЯМБУРГ\"",
+      "articleCode": "Подписка Directum",
+      "licenseName": "",
+      "term": "1 год",
+      "quantity": 1,
+      "unitPrice": 14160584.0,
+      "totalPrice": 14160584.0
+    },
+    {
+      "id": 5,
+      "expirationDate": "2025-07-28",
+      "customer": "ООО \"ГАЗПРОМ ИНВЕСТ\"",
+      "articleCode": "Подписка Directum",
+      "licenseName": "",
+      "term": "1 год",
+      "quantity": 1,
+      "unitPrice": 51059304.0,
+      "totalPrice": 51059304.0
+    },
+    {
+      "id": 6,
+      "expirationDate": "2025-11-27",
+      "customer": "ООО \"ГАЗПРОМ КОМПЛЕКТАЦИЯ\"",
+      "articleCode": "Подписка Directum",
+      "licenseName": "",
+      "term": "1 год",
+      "quantity": 1,
+      "unitPrice": 12129928.0,
+      "totalPrice": 12129928.0
+    },
+    {
+      "id": 7,
+      "expirationDate": "2025-06-20",
+      "customer": "ООО \"ГАЗПРОМ ПХГ\"",
+      "articleCode": "Подписка Directum",
+      "licenseName": "",
+      "term": "1 год",
+      "quantity": 1,
+      "unitPrice": 18065800.0,
+      "totalPrice": 18065800.0
+    },
+    {
+      "id": 8,
+      "expirationDate": "2025-03-30",
+      "customer": "ООО \"ГАЗПРОМ ТРАНСГАЗ КРАСНОДАР\"",
+      "articleCode": "Подписка Directum",
+      "licenseName": "",
+      "term": "1 год",
+      "quantity": 1,
+      "unitPrice": 9039208.0,
+      "totalPrice": 9039208.0
+    },
+    {
+      "id": 9,
+      "expirationDate": "2025-10-18",
+      "customer": "ООО \"ГАЗПРОМ ТРАНСГАЗ МАХАЧКАЛА\"",
+      "articleCode": "Подписка Directum",
+      "licenseName": "",
+      "term": "1 год",
+      "quantity": 1,
+      "unitPrice": 4268796.0,
+      "totalPrice": 4268796.0
+    },
+    {
+      "id": 10,
+      "expirationDate": "2025-12-27",
+      "customer": "ООО \"ГАЗПРОМ ТРАНСГАЗ САНКТ-ПЕТЕРБУРГ\"",
+      "articleCode": "Подписка Directum",
+      "licenseName": "",
+      "term": "1 год",
+      "quantity": 1,
+      "unitPrice": 637016.0,
+      "totalPrice": 637016.0
+    },
+    {
+      "id": 11,
+      "expirationDate": "2025-03-09",
+      "customer": "ООО \"ГАЗПРОМ ТРАНСГАЗ САРАТОВ\"",
+      "articleCode": "Подписка Directum",
+      "licenseName": "",
+      "term": "1 год",
+      "quantity": 1,
+      "unitPrice": 16926344.0,
+      "totalPrice": 16926344.0
+    },
+    {
+      "id": 12,
+      "expirationDate": "2025-06-05",
+      "customer": "ООО \"ГАЗПРОМ ТРАНСГАЗ СТАВРОПОЛЬ\"",
+      "articleCode": "Подписка Directum",
+      "licenseName": "",
+      "term": "1 год",
+      "quantity": 1,
+      "unitPrice": 7326728.0,
+      "totalPrice": 7326728.0
+    },
+    {
+      "id": 13,
+      "expirationDate": "2024-12-31",
+      "customer": "ООО \"ГАЗПРОМ ТРАНСГАЗ СУРГУТ\"",
+      "articleCode": "Подписка Directum",
+      "licenseName": "",
+      "term": "1 год",
+      "quantity": 1,
+      "unitPrice": 16815928.0,
+      "totalPrice": 16815928.0
+    },
+    {
+      "id": 14,
+      "expirationDate": "2025-03-25",
+      "customer": "ООО \"ГАЗПРОМ ТРАНСГАЗ ТОМСК\"",
+      "articleCode": "Подписка Directum",
+      "licenseName": "",
+      "term": "1 год",
+      "quantity": 1,
+      "unitPrice": 17625828.0,
+      "totalPrice": 17625828.0
+    },
+    {
+      "id": 15,
+      "expirationDate": "2024-12-31",
+      "customer": "ООО \"ГАЗПРОМ ТРАНСГАЗ УХТА\"",
+      "articleCode": "Подписка Directum",
+      "licenseName": "",
+      "term": "1 год",
+      "quantity": 1,
+      "unitPrice": 30139040.0,
+      "totalPrice": 30139040.0
+    },
+    {
+      "id": 16,
+      "expirationDate": "2024-12-31",
+      "customer": "ООО \"ГАЗПРОМ ТРАНСГАЗ ЧАЙКОВСКИЙ\"",
+      "articleCode": "Подписка Directum",
+      "licenseName": "",
+      "term": "1 год",
+      "quantity": 1,
+      "unitPrice": 20199080.0,
+      "totalPrice": 20199080.0
+    },
+    {
+      "id": 17,
+      "expirationDate": "2022-12-31",
+      "customer": "ООО \"ГАЗПРОМ ЭЭС\"",
+      "articleCode": "Подписка Directum",
+      "licenseName": "",
+      "term": "1 год",
+      "quantity": 1,
+      "unitPrice": 2242800.0,
+      "totalPrice": 2242800.0
+    },
+    {
+      "id": 18,
+      "expirationDate": "2024-05-31",
+      "customer": "ООО \"ГАЗПРОМ ДОБЫЧА НАДЫМ\"",
+      "articleCode": "Подписка Directum",
+      "licenseName": "",
+      "term": "1 год",
+      "quantity": 1,
+      "unitPrice": 27862576.0,
+      "totalPrice": 27862576.0
+    },
+    {
+      "id": 19,
+      "expirationDate": "2024-04-09",
+      "customer": "ООО \"ГАЗПРОМ ТРАНСГАЗ ЮГОРСК\"",
+      "articleCode": "Подписка Directum",
+      "licenseName": "",
+      "term": "1 год",
+      "quantity": 1,
+      "unitPrice": 19354536.0,
+      "totalPrice": 19354536.0
+    },
+    {
+      "id": 20,
+      "expirationDate": "2026-04-17",
+      "customer": "ООО \"АКИМ ДЕВЕЛОПМЕНТ\"",
+      "articleCode": "АПКШ Континент СД 3.М 01425",
+      "licenseName": "Комплексная поставка",
+      "term": "Бессрочный",
+      "quantity": 30,
+      "unitPrice": 11700.0,
+      "totalPrice": 234000.0
+    },
+    {
+      "id": 21,
+      "expirationDate": "2026-04-17",
+      "customer": "ООО \"АКИМ ДЕВЕЛОПМЕНТ\"",
+      "articleCode": "АПКШ Континент СД 3.М 01425",
+      "licenseName": "Промышленная лицензия",
+      "term": "Бессрочный",
+      "quantity": 7,
+      "unitPrice": 193050.0,
+      "totalPrice": 1351350.0
+    },
+    {
+      "id": 22,
+      "expirationDate": "2026-04-17",
+      "customer": "ООО \"АКИМ ДЕВЕЛОПМЕНТ\"",
+      "articleCode": "АПКШ Континент СД 3.М 01425",
+      "licenseName": "Промышленная лицензия",
+      "term": "Бессрочный",
+      "quantity": 5,
+      "unitPrice": 187250.0,
+      "totalPrice": 936250.0
+    },
+    {
+      "id": 23,
+      "expirationDate": "2026-04-17",
+      "customer": "ООО \"ГАЗПРОМ МЕЖРЕГИОНГАЗ ИНЖИНИРИНГ\"",
+      "articleCode": "АПКШ Континент СД 3.М 01425",
+      "licenseName": "Промышленная лицензия",
+      "term": "Бессрочный",
+      "quantity": 150,
+      "unitPrice": 11700.0,
+      "totalPrice": 1287000.0
+    },
+    {
+      "id": 24,
+      "expirationDate": "2026-04-09",
+      "customer": "ООО \"ГАЗПРОМ МЕЖРЕГИОНГАЗ КИРОВ\"",
+      "articleCode": "АПКШ Континент СД 3.М 01425",
+      "licenseName": "Промышленная лицензия",
+      "term": "Бессрочный",
+      "quantity": 1,
+      "unitPrice": 107250.0,
+      "totalPrice": 107250.0
+    }
+  ]
+}

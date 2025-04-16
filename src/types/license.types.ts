@@ -6,9 +6,11 @@ export interface LicenseData {
   expirationDate: string
   customer: string
   articleCode: string
-  productName: string
-  licenseTerm: string
+  licenseName: string
+  term: string
   quantity: number
+  unitPrice: number
+  totalPrice: number
 }
 
 /**
@@ -87,11 +89,7 @@ export interface Summary {
  * Полный набор данных, получаемый от API
  */
 export interface LicensesApiData {
-  companies: Company[]
-  products: Product[]
-  expirations: Expiration[]
   licenses: LicenseData[]
-  summary: Summary
 }
 
 /**
@@ -108,8 +106,11 @@ export interface ExtendedLicense {
   endDate: Date // Дата окончания отображения на диаграмме
   position: number // Позиция по вертикали (процент)
   status: 'active' | 'expired' | 'renewal' // Статус лицензии
-  articleCode?: string // Артикул продукта
+  articleCode: string // Артикул продукта
   productName?: string // Название продукта
+  term?: string // Срок лицензии
+  unitPrice?: number // Цена за единицу
+  totalPrice?: number // Общая стоимость
 }
 
 /**
@@ -138,4 +139,12 @@ export interface GanttChartConfig {
 /**
  * Тип для определения уровня детализации дат
  */
-export type DateGranularity = 'year' | 'quarter' | 'month' | 'week' | 'day'
+export enum DateGranularity {
+  YEAR = 'year',
+  QUARTER = 'quarter',
+  MONTH = 'month',
+  WEEK = 'week',
+  DAY = 'day',
+}
+
+export type DateGranularityType = 'year' | 'quarter' | 'month' | 'week' | 'day'
