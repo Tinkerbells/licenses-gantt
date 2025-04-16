@@ -1,228 +1,213 @@
-import type { License, LicensesData } from '../types/license.types'
+import type { ExtendedLicense, LicensesApiData } from '../types/license.types'
 
-/**
- * Моковые данные лицензий для тестирования
- */
-const MOCK_LICENSES: License[] = [
-  {
-    title: 'KL3213RATYS',
-    company: 'ООО Добыча нефти',
-    date: '2025-06-17',
-    amount: 750,
-  },
-  {
-    title: 'ZX9876OPIJK',
-    company: 'ООО Добыча нефти',
-    date: '2025-07-25',
-    amount: 750,
-  },
-  {
-    title: 'MN1234ABC',
-    company: 'ООО Добыча нефти',
-    date: '2025-08-03',
-    amount: 750,
-  },
-  {
-    title: 'GH5678JKL',
-    company: 'ООО Добыча нефти',
-    date: '2025-09-14',
-    amount: 750,
-  },
-  {
-    title: 'EF9012QWE',
-    company: 'ООО Добыча нефти',
-    date: '2025-10-01',
-    amount: 750,
-  },
-  {
-    title: 'AB3456RST',
-    company: 'ООО Добыча нефти',
-    date: '2024-04-15',
-    amount: 750,
-  },
-  {
-    title: 'CD7890UVW',
-    company: 'ООО Добыча нефти',
-    date: '2024-05-20',
-    amount: 750,
-  },
-  {
-    title: 'EF1234XYZ',
-    company: 'ООО Добыча нефти',
-    date: '2024-06-10',
-    amount: 750,
-  },
-  {
-    title: 'GH5678ABC',
-    company: 'ООО Добыча нефти',
-    date: '2024-07-05',
-    amount: 750,
-  },
-  {
-    title: 'IJ9012DEF',
-    company: 'ООО Добыча нефти',
-    date: '2024-08-22',
-    amount: 750,
-  },
-  {
-    title: 'KL3456GHI',
-    company: 'ООО Добыча нефти',
-    date: '2024-09-18',
-    amount: 750,
-  },
-  {
-    title: 'MN7890JKL',
-    company: 'ООО Добыча нефти',
-    date: '2024-10-07',
-    amount: 750,
-  },
-  {
-    title: 'OP1234MNO',
-    company: 'ООО Добыча нефти',
-    date: '2024-11-12',
-    amount: 750,
-  },
-  {
-    title: 'QR5678PQR',
-    company: 'ООО Добыча нефти',
-    date: '2024-12-01',
-    amount: 750,
-  },
-  {
-    title: 'ST9012STU',
-    company: 'ООО Добыча нефти',
-    date: '2025-01-15',
-    amount: 750,
-  },
-  {
-    title: 'UV3456VWX',
-    company: 'ООО Добыча нефти',
-    date: '2025-02-28',
-    amount: 750,
-  },
-  {
-    title: 'WX7890YZA',
-    company: 'ООО Добыча нефти',
-    date: '2025-03-10',
-    amount: 750,
-  },
-  {
-    title: 'YZ1234BCD',
-    company: 'ООО Добыча нефти',
-    date: '2025-04-05',
-    amount: 750,
-  },
-  {
-    title: 'AC5678EFG',
-    company: 'ООО Добыча нефти',
-    date: '2025-05-20',
-    amount: 750,
-  },
-  {
-    title: 'BD9012HIJ',
-    company: 'ООО Добыча нефти',
-    date: '2025-06-15',
-    amount: 750,
-  },
-  {
-    title: 'CE3456KLM',
-    company: 'ООО Добыча нефти',
-    date: '2025-07-10',
-    amount: 750,
-  },
-  {
-    title: 'DF7890NOP',
-    company: 'ООО Добыча нефти',
-    date: '2025-08-05',
-    amount: 750,
-  },
-  {
-    title: 'EG1234QRS',
-    company: 'ООО Добыча нефти',
-    date: '2025-09-01',
-    amount: 750,
-  },
-  {
-    title: 'FH5678TUV',
-    company: 'ООО Добыча нефти',
-    date: '2025-10-10',
-    amount: 750,
-  },
-  {
-    title: 'GI9012WXY',
-    company: 'ООО Добыча нефти',
-    date: '2025-11-15',
-    amount: 750,
-  },
-  {
-    title: 'HJ3456ZAB',
-    company: 'ООО Добыча нефти',
-    date: '2025-12-20',
-    amount: 750,
-  },
-  {
-    title: 'IK7890CDE',
-    company: 'ООО Добыча нефти',
-    date: '2024-04-25',
-    amount: 750,
-  },
-  {
-    title: 'JL1234FGH',
-    company: 'ООО Добыча нефти',
-    date: '2024-05-15',
-    amount: 750,
-  },
-  {
-    title: 'KM5678IJK',
-    company: 'ООО Добыча нефти',
-    date: '2024-06-20',
-    amount: 750,
-  },
-  {
-    title: 'LN9012LMN',
-    company: 'ООО Добыча нефти',
-    date: '2024-07-25',
-    amount: 750,
-  },
-]
+import data from '../../data.json'
 
 /**
  * Класс для работы с API лицензий
  */
 export class LicenseService {
   /**
-   * Получение списка лицензий
+   * Получение данных лицензий
    * @returns Promise с данными лицензий
    */
-  static async getLicenses(): Promise<LicensesData> {
-    // Имитация задержки сетевого запроса
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({ licenses: MOCK_LICENSES })
-      }, 800)
-    })
+  static async getLicensesData(): Promise<LicensesApiData> {
+    try {
+      // В реальном проекте здесь был бы fetch запрос к API
+      // const response = await fetch('/api/licenses')
+      // if (!response.ok) {
+      //   throw new Error(`Ошибка запроса: ${response.status}`)
+      // }
+      // return await response.json()
+      return data
+    }
+    catch (error) {
+      console.error('Ошибка при загрузке данных лицензий:', error)
+
+      // В случае ошибки используем локальные данные
+      const data = await this.getLocalData()
+      return data
+    }
   }
 
   /**
-   * Имитация реального запроса на сервер
-   * В реальном проекте здесь был бы настоящий fetch запрос
+   * Получение локальных данных для тестирования
+   * @returns Данные лицензий из локального JSON
    */
-  static async fetchLicenses(): Promise<LicensesData> {
-    // Пример того, как мог бы выглядеть реальный запрос
-    /*
+  static async getLocalData(): Promise<LicensesApiData> {
     try {
-      const response = await fetch('/api/licenses');
-      if (!response.ok) {
-        throw new Error(`Ошибка запроса: ${response.status}`);
-      }
-      return await response.json();
-    } catch (error) {
-      console.error('Ошибка при загрузке лицензий:', error);
-      throw error;
+      // В реальном проекте здесь бы загружался локальный JSON
+      // Для примера возвращаем фиктивный ответ
+      return await new Promise((resolve) => {
+        setTimeout(() => {
+          fetch('/data.json')
+            .then(response => response.json())
+            .then(data => resolve(data))
+            .catch(() => {
+              // Если не удалось загрузить локальный JSON, возвращаем минимальные тестовые данные
+              resolve({
+                companies: [],
+                products: [],
+                expirations: [],
+                licenses: [],
+                summary: {
+                  totalLicenses: 0,
+                  companiesCount: 0,
+                  productsCount: 0,
+                  nextExpiringLicenses: [],
+                  productDistribution: [],
+                  topCompanies: [],
+                  licensesByMonth: [],
+                },
+              })
+            })
+        }, 800)
+      })
     }
-    */
+    catch (error) {
+      console.error('Ошибка при загрузке локальных данных:', error)
+      throw error
+    }
+  }
 
-    // Вместо этого возвращаем моковые данные
-    return this.getLicenses()
+  /**
+   * Преобразование данных API в формат для диаграммы Ганта
+   * @param data Данные от API
+   * @returns Массив расширенных данных лицензий для визуализации
+   */
+  static prepareGanttData(data: LicensesApiData): ExtendedLicense[] {
+    const extendedLicenses: ExtendedLicense[] = []
+
+    // Обработка данных из разных источников
+
+    // 1. Берем данные из секции expirations
+    data.expirations.forEach((expiration) => {
+      expiration.companies.forEach((company) => {
+        company.products.forEach((product) => {
+          const productDetails = data.products.find(p => p.articleCode === product.articleCode)
+
+          extendedLicenses.push({
+            id: `exp-${expiration.date}-${company.name}-${product.articleCode}`,
+            title: product.articleCode,
+            company: company.name,
+            date: expiration.date,
+            amount: product.quantity,
+            startDate: new Date(), // Будет рассчитано позже
+            endDate: new Date(expiration.date),
+            position: 0, // Будет рассчитано позже
+            status: 'active', // Будет рассчитано позже
+            articleCode: product.articleCode,
+            productName: productDetails?.name,
+          })
+        })
+      })
+    })
+
+    // 2. Дополняем данными из companies, если не все еще учтены
+    data.companies.forEach((company) => {
+      company.expirationDates.forEach((expDate) => {
+        // Проверяем, есть ли уже лицензия с такой компанией и датой
+        const exists = extendedLicenses.some(
+          lic => lic.company === company.name && lic.date === expDate.date,
+        )
+
+        if (!exists) {
+          extendedLicenses.push({
+            id: `comp-${company.id}-${expDate.date}`,
+            title: `Лицензия ${company.name}`,
+            company: company.name,
+            date: expDate.date,
+            amount: expDate.quantity,
+            startDate: new Date(), // Будет рассчитано позже
+            endDate: new Date(expDate.date),
+            position: 0, // Будет рассчитано позже
+            status: 'active', // Будет рассчитано позже
+          })
+        }
+      })
+    })
+
+    // 3. Добавляем данные из индивидуальных лицензий, если они еще не учтены
+    data.licenses.forEach((license) => {
+      // Проверяем, есть ли уже лицензия с таким же id или комбинацией компании и даты
+      const exists = extendedLicenses.some(
+        lic =>
+          (lic.id === `lic-${license.id}`)
+          || (lic.company === license.customer
+            && lic.date === license.expirationDate
+            && lic.articleCode === license.articleCode),
+      )
+
+      if (!exists) {
+        extendedLicenses.push({
+          id: `lic-${license.id}`,
+          title: license.articleCode,
+          company: license.customer,
+          date: license.expirationDate,
+          amount: license.quantity,
+          startDate: new Date(), // Будет рассчитано позже
+          endDate: new Date(license.expirationDate),
+          position: 0, // Будет рассчитано позже
+          status: 'active', // Будет рассчитано позже
+          articleCode: license.articleCode,
+          productName: license.productName,
+        })
+      }
+    })
+
+    // Расчет дополнительных полей для визуализации
+    return this.calculateVisualizationParams(extendedLicenses)
+  }
+
+  /**
+   * Расчет параметров визуализации для лицензий
+   * @param licenses Базовые данные лицензий
+   * @returns Расширенные данные с параметрами для визуализации
+   */
+  private static calculateVisualizationParams(licenses: ExtendedLicense[]): ExtendedLicense[] {
+    // Сортируем по дате окончания и компании
+    const sortedLicenses = [...licenses].sort((a, b) => {
+      const dateA = new Date(a.date).getTime()
+      const dateB = new Date(b.date).getTime()
+
+      if (dateA === dateB) {
+        return a.company.localeCompare(b.company)
+      }
+      return dateA - dateB
+    })
+
+    const now = new Date()
+
+    // Рассчитываем параметры для каждой лицензии
+    return sortedLicenses.map((license, index) => {
+      // Рассчитываем дату начала как 3 месяца до даты окончания
+      const endDate = new Date(license.date)
+      const startDate = new Date(endDate)
+      startDate.setMonth(startDate.getMonth() - 3)
+
+      // Определяем вертикальную позицию (20% до 120% с равномерным распределением)
+      const position = 20 + (index * 100) / (sortedLicenses.length > 1 ? sortedLicenses.length - 1 : 1)
+
+      // Определяем статус лицензии
+      let status: 'active' | 'expired' | 'renewal'
+
+      if (endDate < now) {
+        status = 'expired'
+      }
+      else if (endDate.getTime() - now.getTime() < 30 * 24 * 60 * 60 * 1000) {
+        // Если до истечения меньше 30 дней
+        status = 'renewal'
+      }
+      else {
+        status = 'active'
+      }
+
+      return {
+        ...license,
+        startDate,
+        endDate,
+        position,
+        status,
+      }
+    })
   }
 }

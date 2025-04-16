@@ -46,8 +46,8 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
       setError(null)
 
       try {
-        const response = await LicenseService.fetchLicenses()
-        const preparedData = prepareLicenseData(response.licenses)
+        const response = await LicenseService.getLicensesData()
+        const preparedData = prepareLicenseData(response)
         setData(preparedData)
       }
       catch (error) {

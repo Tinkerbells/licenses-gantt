@@ -1,0 +1,506 @@
+{
+  "companies": [
+    {
+      "id": 1,
+      "name": "АО «Востокгазпром»",
+      "totalLicenses": 750,
+      "products": [
+        {
+          "articleCode": "KL4313RAYTS",
+          "quantity": 300
+        },
+        {
+          "articleCode": "KL4867RAYTS",
+          "quantity": 450
+        }
+      ],
+      "expirationDates": [
+        {
+          "date": "2025-10-13",
+          "quantity": 750
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "АО «Газпром диагностика»",
+      "totalLicenses": 2200,
+      "products": [
+        {
+          "articleCode": "KL4313RAYTS",
+          "quantity": 1100
+        },
+        {
+          "articleCode": "KL4867RAYTS",
+          "quantity": 1100
+        }
+      ],
+      "expirationDates": [
+        {
+          "date": "2025-06-09",
+          "quantity": 2200
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "АО «Газпром космические системы»",
+      "totalLicenses": 1654,
+      "products": [
+        {
+          "articleCode": "KL4313RAYTS",
+          "quantity": 800
+        },
+        {
+          "articleCode": "KL4867RAYTS",
+          "quantity": 854
+        }
+      ],
+      "expirationDates": [
+        {
+          "date": "2025-03-04",
+          "quantity": 800
+        },
+        {
+          "date": "2025-12-07",
+          "quantity": 749
+        },
+        {
+          "date": "2026-01-09",
+          "quantity": 105
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Газпром газобезопасность ООО",
+      "totalLicenses": 646,
+      "products": [
+        {
+          "articleCode": "KL4556RAYFS",
+          "quantity": 646
+        }
+      ],
+      "expirationDates": [
+        {
+          "date": "2025-12-29",
+          "quantity": 646
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "ЗАО «Росшельф»",
+      "totalLicenses": 131,
+      "products": [
+        {
+          "articleCode": "KL4313RAYTS",
+          "quantity": 80
+        },
+        {
+          "articleCode": "KL4867RAYTS",
+          "quantity": 51
+        }
+      ],
+      "expirationDates": [
+        {
+          "date": "2025-08-05",
+          "quantity": 131
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "ОАО «Севернефтегазпром»",
+      "totalLicenses": 750,
+      "products": [
+        {
+          "articleCode": "KL4867RAYTS",
+          "quantity": 750
+        }
+      ],
+      "expirationDates": [
+        {
+          "date": "2025-12-13",
+          "quantity": 750
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "ООО \"Газпром информ\"",
+      "totalLicenses": 5000,
+      "products": [
+        {
+          "articleCode": "KL4556RAYFS",
+          "quantity": 5000
+        }
+      ],
+      "expirationDates": [
+        {
+          "date": "2025-12-26",
+          "quantity": 5000
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "ООО \"Газпром комплектация\"",
+      "totalLicenses": 1200,
+      "products": [
+        {
+          "articleCode": "KL4556RAYFS",
+          "quantity": 1200
+        }
+      ],
+      "expirationDates": [
+        {
+          "date": "2025-12-23",
+          "quantity": 1200
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "ПАО «Газпром»",
+      "totalLicenses": 13502,
+      "products": [
+        {
+          "articleCode": "KL4222RAYTS",
+          "quantity": 2
+        },
+        {
+          "articleCode": "KL4313RAYTS",
+          "quantity": 6750
+        },
+        {
+          "articleCode": "KL4867RAYTS",
+          "quantity": 6750
+        }
+      ],
+      "expirationDates": [
+        {
+          "date": "2025-12-08",
+          "quantity": 13502
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "ПАО «Газпром нефть»",
+      "totalLicenses": 182349,
+      "products": [
+        {
+          "articleCode": "KL4313RAYTS",
+          "quantity": 120000
+        },
+        {
+          "articleCode": "KL4867RAYTS",
+          "quantity": 62349
+        }
+      ],
+      "expirationDates": [
+        {
+          "date": "2025-06-29",
+          "quantity": 182349
+        }
+      ]
+    }
+  ],
+  "products": [
+    {
+      "articleCode": "KL4222RAYTS",
+      "name": "Kaspersky Security для систем хранения данных, Server Russian Edition. 5000+ FileServer 3 year Base License - Лицензия",
+      "licenseYears": 3,
+      "totalQuantity": 2
+    },
+    {
+      "articleCode": "KL4313RAYTS",
+      "name": "Kaspersky Security для почтовых серверов Russian Edition. 5000+ MailAddress 3 year Base License - Лицензия",
+      "licenseYears": 3,
+      "totalQuantity": 131938
+    },
+    {
+      "articleCode": "KL4413RAYTS",
+      "name": "Kaspersky Security для интернет-шлюзов Russian Edition. 5000+ Node 3 year Base License - Лицензия",
+      "licenseYears": 3,
+      "totalQuantity": 1482
+    },
+    {
+      "articleCode": "KL4555RAYTS",
+      "name": "Kaspersky Security для виртуальных и облачных сред, Core Russian Edition. 5000+ Core 3 year Base License - Лицензия",
+      "licenseYears": 3,
+      "totalQuantity": 22
+    },
+    {
+      "articleCode": "KL4556RAYFS",
+      "name": "Kaspersky Total Space Security Ultimate Corporate Russian Edition. 5000+ Workstation / FileServer / MailServer 1 year Base License - Лицензия",
+      "licenseYears": 1,
+      "totalQuantity": 44344
+    },
+    {
+      "articleCode": "KL4867RAYTS",
+      "name": "Kaspersky Endpoint Security для бизнеса – Расширенный Russian Edition. 5000+ Node 3 year Base License - Лицензия",
+      "licenseYears": 3,
+      "totalQuantity": 94556
+    },
+    {
+      "articleCode": "KL4892RAYTS",
+      "name": "Kaspersky Security для банкоматов и точек мгновенной оплаты Compliance Edition Russian Edition. 5000+ Node 3 year Base License - Лицензия",
+      "licenseYears": 3,
+      "totalQuantity": 200
+    }
+  ],
+  "expirations": [
+    {
+      "date": "2025-01-17",
+      "totalLicenses": 2890,
+      "companies": [
+        {
+          "name": "ООО «Газпром газнадзор»",
+          "licenses": 2890,
+          "products": [
+            {
+              "articleCode": "KL4313RAYTS",
+              "quantity": 1500
+            },
+            {
+              "articleCode": "KL4413RAYTS",
+              "quantity": 1300
+            },
+            {
+              "articleCode": "KL4867RAYTS",
+              "quantity": 90
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2025-01-31",
+      "totalLicenses": 100,
+      "companies": [
+        {
+          "name": "ООО «Газпром переработка Благовещенск»",
+          "licenses": 100,
+          "products": [
+            {
+              "articleCode": "KL4867RAYTS",
+              "quantity": 100
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2025-02-17",
+      "totalLicenses": 1719,
+      "companies": [
+        {
+          "name": "ООО «Газпром ВНИИГАЗ»",
+          "licenses": 1719,
+          "products": [
+            {
+              "articleCode": "KL4867RAYTS",
+              "quantity": 1719
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "licenses": [
+    {
+      "id": 1,
+      "expirationDate": "2025-01-17",
+      "customer": "ООО «Газпром газнадзор»",
+      "articleCode": "KL4313RAYTS",
+      "productName": "Kaspersky Security для почтовых серверов Russian Edition. 5000+ MailAddress 3 year Base License - Лицензия",
+      "licenseTerm": "3 year",
+      "quantity": 1500
+    },
+    {
+      "id": 2,
+      "expirationDate": "2025-01-17",
+      "customer": "ООО «Газпром газнадзор»",
+      "articleCode": "KL4413RAYTS",
+      "productName": "Kaspersky Security для интернет-шлюзов Russian Edition. 5000+ Node 3 year Base License - Лицензия",
+      "licenseTerm": "3 year",
+      "quantity": 1300
+    },
+    {
+      "id": 3,
+      "expirationDate": "2025-01-17",
+      "customer": "ООО «Газпром газнадзор»",
+      "articleCode": "KL4867RAYTS",
+      "productName": "Kaspersky Endpoint Security для бизнеса – Расширенный Russian Edition. 5000+ Node 3 year Base License - Лицензия",
+      "licenseTerm": "3 year",
+      "quantity": 90
+    },
+    {
+      "id": 4,
+      "expirationDate": "2025-01-31",
+      "customer": "ООО «Газпром переработка Благовещенск»",
+      "articleCode": "KL4867RAYTS",
+      "productName": "Kaspersky Endpoint Security для бизнеса – Расширенный Russian Edition. 5000+ Node 3 year Base License - Лицензия",
+      "licenseTerm": "3 year",
+      "quantity": 100
+    },
+    {
+      "id": 5,
+      "expirationDate": "2025-02-17",
+      "customer": "ООО «Газпром ВНИИГАЗ»",
+      "articleCode": "KL4867RAYTS",
+      "productName": "Kaspersky Endpoint Security для бизнеса – Расширенный Russian Edition. 5000+ Node 3 year Base License - Лицензия",
+      "licenseTerm": "3 year",
+      "quantity": 1719
+    }
+  ],
+  "summary": {
+    "totalLicenses": 272542,
+    "companiesCount": 44,
+    "productsCount": 7,
+    "nextExpiringLicenses": [
+      {
+        "date": "2025-01-17",
+        "quantity": 2890,
+        "company": "ООО «Газпром газнадзор»"
+      },
+      {
+        "date": "2025-01-31",
+        "quantity": 100,
+        "company": "ООО «Газпром переработка Благовещенск»"
+      },
+      {
+        "date": "2025-02-17",
+        "quantity": 1719,
+        "company": "ООО «Газпром ВНИИГАЗ»"
+      }
+    ],
+    "productDistribution": [
+      {
+        "articleCode": "KL4313RAYTS",
+        "name": "Kaspersky Security для почтовых серверов",
+        "quantity": 131938,
+        "percentage": 48.4
+      },
+      {
+        "articleCode": "KL4867RAYTS",
+        "name": "Kaspersky Endpoint Security для бизнеса – Расширенный",
+        "quantity": 94556,
+        "percentage": 34.7
+      },
+      {
+        "articleCode": "KL4556RAYFS",
+        "name": "Kaspersky Total Space Security Ultimate Corporate",
+        "quantity": 44344,
+        "percentage": 16.3
+      },
+      {
+        "articleCode": "KL4413RAYTS",
+        "name": "Kaspersky Security для интернет-шлюзов",
+        "quantity": 1482,
+        "percentage": 0.5
+      },
+      {
+        "articleCode": "KL4892RAYTS",
+        "name": "Kaspersky Security для банкоматов",
+        "quantity": 200,
+        "percentage": 0.1
+      },
+      {
+        "articleCode": "KL4555RAYTS",
+        "name": "Kaspersky Security для виртуальных сред",
+        "quantity": 22,
+        "percentage": 0.0
+      },
+      {
+        "articleCode": "KL4222RAYTS",
+        "name": "Kaspersky Security для систем хранения данных",
+        "quantity": 2,
+        "percentage": 0.0
+      }
+    ],
+    "topCompanies": [
+      {
+        "name": "ПАО «Газпром нефть»",
+        "licenses": 182349,
+        "percentage": 66.9
+      },
+      {
+        "name": "ПАО «Газпром»",
+        "licenses": 13502,
+        "percentage": 5.0
+      },
+      {
+        "name": "ООО «Газпром трансгаз Югорск»",
+        "licenses": 9400,
+        "percentage": 3.4
+      },
+      {
+        "name": "ООО Газпром ПХГ",
+        "licenses": 5924,
+        "percentage": 2.2
+      },
+      {
+        "name": "ООО Газпром переработка",
+        "licenses": 5727,
+        "percentage": 2.1
+      }
+    ],
+    "licensesByMonth": [
+      {
+        "month": "Январь 2025",
+        "quantity": 2990
+      },
+      {
+        "month": "Февраль 2025",
+        "quantity": 5219
+      },
+      {
+        "month": "Март 2025",
+        "quantity": 5562
+      },
+      {
+        "month": "Май 2025",
+        "quantity": 600
+      },
+      {
+        "month": "Июнь 2025",
+        "quantity": 185459
+      },
+      {
+        "month": "Июль 2025",
+        "quantity": 80
+      },
+      {
+        "month": "Август 2025",
+        "quantity": 9063
+      },
+      {
+        "month": "Сентябрь 2025",
+        "quantity": 2338
+      },
+      {
+        "month": "Октябрь 2025",
+        "quantity": 2138
+      },
+      {
+        "month": "Ноябрь 2025",
+        "quantity": 699
+      },
+      {
+        "month": "Декабрь 2025",
+        "quantity": 27077
+      },
+      {
+        "month": "Январь 2026",
+        "quantity": 10084
+      },
+      {
+        "month": "Февраль 2026",
+        "quantity": 21233
+      }
+    ]
+  }
+}

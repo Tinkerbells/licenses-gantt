@@ -1,52 +1,16 @@
 import * as d3 from 'd3'
 
-import type { DateGranularity, ExtendedLicense, License } from '../types/license.types'
+import type { DateGranularity, ExtendedLicense, LicensesApiData } from '../types/license.types'
+
+import { LicenseService } from '../services/license-service'
 
 /**
- * Преобразует данные лицензий в расширенный формат для диаграммы
- * @param licenses Исходные данные лицензий
- * @returns Расширенные данные для диаграммы
+ * Подготовка данных лицензий для диаграммы Ганта
+ * @param apiData Данные от API
+ * @returns Массив расширенных данных лицензий
  */
-export function prepareLicenseData(licenses: License[]): ExtendedLicense[] {
-  // Сортируем лицензии по дате
-  const sortedLicenses = [...licenses].sort((a, b) =>
-    new Date(a.date).getTime() - new Date(b.date).getTime(),
-  )
-
-  // Формируем расширенные данные для диаграммы
-  return sortedLicenses.map((license, index) => {
-    const endDate = new Date(license.date)
-
-    // Рассчитываем дату начала (3 месяца до окончания)
-    const startDate = new Date(endDate)
-    startDate.setMonth(startDate.getMonth() - 3)
-
-    // Рассчитываем позицию по вертикали (20% до 120% с шагом ~3.3% на элемент)
-    const position = 20 + (index * 100) / (sortedLicenses.length > 1 ? sortedLicenses.length - 1 : 1)
-
-    // Определяем статус лицензии
-    const now = new Date()
-    let status: 'active' | 'expired' | 'renewal'
-
-    if (endDate < now) {
-      status = 'expired'
-    }
-    else if (endDate.getTime() - now.getTime() < 30 * 24 * 60 * 60 * 1000) {
-      status = 'renewal' // Если до истечения меньше 30 дней
-    }
-    else {
-      status = 'active'
-    }
-
-    return {
-      ...license,
-      id: `license-${index}`,
-      startDate,
-      endDate,
-      position,
-      status,
-    }
-  })
+export function prepareLicenseData(apiData: LicensesApiData): ExtendedLicense[] {
+  return LicenseService.prepareGanttData(apiData)
 }
 
 /**
@@ -127,7 +91,7 @@ export function generateTimeAxisTicks(startDate: Date, endDate: Date, granularit
     case 'month':
       return d3.timeMonth.range(startDate, endDate)
     case 'quarter':
-      // Для кварталов используем месяцы, но будем фильтровать только начала кварталов
+      // Для кварталов используем месяцы, но фильтруем только начала кварталов
       return d3.timeMonth.range(startDate, endDate)
         .filter(d => d.getMonth() % 3 === 0)
     case 'year':
@@ -154,93 +118,83 @@ export function generateAllTimeTicks(startDate: Date, endDate: Date) {
 }
 
 /**
- * Проверяет, является ли дата первым днём периода (месяца, квартала, года и т.д.)
- * @param date Проверяемая дата
- * @param granularity Уровень детализации
- * @returns true, если дата является первым днём периода
+ * Группирует лицензии по компаниям для визуализации
+ * @param licenses Массив лицензий
+ * @returns Сгруппированные лицензии по компаниям
  */
-export function isFirstDayOfPeriod(date: Date, granularity: DateGranularity): boolean {
-  switch (granularity) {
-    case 'day':
-      return true // Каждый день является первым днём для детализации по дням
-    case 'week':
-      return date.getDay() === 1 // Понедельник как первый день недели
-    case 'month':
-      return date.getDate() === 1 // Первое число месяца
-    case 'quarter':
-      return date.getDate() === 1 && date.getMonth() % 3 === 0
-    case 'year':
-      return date.getDate() === 1 && date.getMonth() === 0
-    default:
-      return false
+export function groupLicensesByCompany(licenses: ExtendedLicense[]): Record<string, ExtendedLicense[]> {
+  const grouped: Record<string, ExtendedLicense[]> = {}
+
+  licenses.forEach((license) => {
+    if (!grouped[license.company]) {
+      grouped[license.company] = []
+    }
+    grouped[license.company].push(license)
+  })
+
+  return grouped
+}
+
+/**
+ * Получает статистику по лицензиям
+ * @param licenses Массив лицензий
+ * @returns Статистика по лицензиям
+ */
+export function getLicenseStats(licenses: ExtendedLicense[]) {
+  const now = new Date()
+
+  // Всего лицензий
+  const totalLicenses = licenses.reduce((sum, license) => sum + license.amount, 0)
+
+  // Количество активных лицензий
+  const activeLicenses = licenses
+    .filter(license => license.status === 'active')
+    .reduce((sum, license) => sum + license.amount, 0)
+
+  // Количество истекающих лицензий (статус renewal)
+  const renewalLicenses = licenses
+    .filter(license => license.status === 'renewal')
+    .reduce((sum, license) => sum + license.amount, 0)
+
+  // Количество истекших лицензий
+  const expiredLicenses = licenses
+    .filter(license => license.status === 'expired')
+    .reduce((sum, license) => sum + license.amount, 0)
+
+  // Ближайшие истекающие лицензии
+  const upcomingExpirations = licenses
+    .filter(license => new Date(license.date) > now)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .slice(0, 5)
+
+  return {
+    totalLicenses,
+    activeLicenses,
+    renewalLicenses,
+    expiredLicenses,
+    upcomingExpirations,
   }
 }
 
 /**
- * Снимает дату до начала заданного периода (месяц, квартал, год)
- * @param date Исходная дата
- * @param granularity Уровень детализации
- * @returns Новая дата, соответствующая началу периода
+ * Создает сводную информацию по лицензиям для отображения
+ * @param licenses Массив лицензий
+ * @returns Текстовая сводка
  */
-export function getStartOfPeriod(date: Date, granularity: DateGranularity): Date {
-  const result = new Date(date)
+export function getLicenseSummary(licenses: ExtendedLicense[]): string {
+  const stats = getLicenseStats(licenses)
+  const nextExpiration = stats.upcomingExpirations[0]
 
-  switch (granularity) {
-    case 'day':
-      result.setHours(0, 0, 0, 0)
-      break
-    case 'week':
-      const day = result.getDay()
-      const diff = result.getDate() - day + (day === 0 ? -6 : 1) // корректировка для недели, начинающейся с понедельника
-      result.setDate(diff)
-      result.setHours(0, 0, 0, 0)
-      break
-    case 'month':
-      result.setDate(1)
-      result.setHours(0, 0, 0, 0)
-      break
-    case 'quarter':
-      const quarter = Math.floor(result.getMonth() / 3)
-      result.setMonth(quarter * 3, 1)
-      result.setHours(0, 0, 0, 0)
-      break
-    case 'year':
-      result.setMonth(0, 1)
-      result.setHours(0, 0, 0, 0)
-      break
+  if (!nextExpiration) {
+    return 'Нет данных о лицензиях'
   }
 
-  return result
-}
+  const nextExpirationDate = new Date(nextExpiration.date).toLocaleDateString('ru-RU')
+  const daysToExpiration = Math.ceil(
+    (new Date(nextExpiration.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24),
+  )
 
-/**
- * Получает конец периода для заданной даты
- * @param date Исходная дата
- * @param granularity Уровень детализации
- * @returns Новая дата, соответствующая концу периода
- */
-export function getEndOfPeriod(date: Date, granularity: DateGranularity): Date {
-  const start = getStartOfPeriod(date, granularity)
-  const result = new Date(start)
-
-  switch (granularity) {
-    case 'day':
-      result.setDate(result.getDate() + 1)
-      break
-    case 'week':
-      result.setDate(result.getDate() + 7)
-      break
-    case 'month':
-      result.setMonth(result.getMonth() + 1)
-      break
-    case 'quarter':
-      result.setMonth(result.getMonth() + 3)
-      break
-    case 'year':
-      result.setFullYear(result.getFullYear() + 1)
-      break
-  }
-
-  result.setMilliseconds(result.getMilliseconds() - 1)
-  return result
+  return `Всего лицензий: ${stats.totalLicenses}. `
+    + `Активных: ${stats.activeLicenses}. `
+    + `Ближайшее истечение: ${nextExpirationDate} (${nextExpiration.company}, ${nextExpiration.amount} шт, ${daysToExpiration} дн.)`
 }

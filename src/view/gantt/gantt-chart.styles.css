@@ -11,12 +11,59 @@
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
     Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Заголовок */
+.gantt-header {
+  background-color: #f0f8ff;
+  padding: 10px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+.gantt-header h1 {
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+  margin: 0;
+}
+
+.gantt-stats {
+  display: flex;
+  align-items: center;
+}
+
+.summary-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #666;
+}
+
+.stat-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0078d4;
 }
 
 /* Контейнер диаграммы */
 .license-gantt-chart {
   width: 100%;
-  height: 100%;
+  height: calc(100% - 50px);
   position: relative;
   cursor: move;
 }
@@ -81,6 +128,7 @@
 .license-bar {
   fill: #f0f0f0;
   stroke: #cccccc;
+  transition: fill 0.2s ease;
 }
 
 .license-active .license-bar {
@@ -105,11 +153,6 @@
 
 .status-label {
   fill: #666;
-}
-
-.amount-bg {
-  fill: #e6f2ff;
-  stroke: #a9d1f7;
 }
 
 .amount-label {
@@ -139,6 +182,21 @@
 }
 
 .brush-date-label {
+  pointer-events: none;
+}
+
+/* Стили для тултипа */
+.license-tooltip {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  font-size: 12px;
+  line-height: 1.5;
+  z-index: 1000;
+  max-width: 300px;
   pointer-events: none;
 }
 
@@ -211,7 +269,7 @@
   .company-label,
   .status-label,
   .amount-label {
-    font-size: 10px;
+    font-size: 9px;
   }
 
   .x-axis text,
@@ -221,6 +279,30 @@
   }
 
   .time-labels text {
+    font-size: 9px;
+  }
+
+  .gantt-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 8px 15px;
+  }
+
+  .gantt-header h1 {
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+
+  .summary-stats {
+    gap: 10px;
+    margin-top: 5px;
+  }
+
+  .stat-label {
     font-size: 10px;
+  }
+
+  .stat-value {
+    font-size: 12px;
   }
 }

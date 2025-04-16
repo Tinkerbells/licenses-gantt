@@ -9,8 +9,8 @@ export const DEFAULT_GANTT_CONFIG: GanttChartConfig = {
   margin: {
     top: 60,
     right: 40,
-    bottom: 50,
-    left: 60,
+    bottom: 100,
+    left: 100, // Увеличено для длинных названий компаний
   },
   elementHeight: 30,
   padding: 5,
@@ -82,7 +82,7 @@ export const RESPONSIVE_CONFIG = {
       top: 40,
       right: 20,
       bottom: 40,
-      left: 40,
+      left: 120,
     },
   },
 }
