@@ -2,6 +2,7 @@ import * as d3 from 'd3'
 
 import type { DateGranularity, ExtendedLicense, LicensesApiData } from '../types/license.types'
 
+import { formatRussianDate } from './locale-utils'
 import { LicenseService } from '../services/license-service'
 
 /**
@@ -47,32 +48,7 @@ export function determineDateGranularity(startDate: Date, endDate: Date): DateGr
  * @returns Отформатированная строка даты
  */
 export function formatDateByGranularity(date: Date, granularity: DateGranularity, isShort: boolean = false): string {
-  const months = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь']
-  const shortMonths = ['янв', 'фев', 'март', 'апр', 'май', 'июнь', 'июль', 'авг', 'сен', 'окт', 'ноя', 'дек']
-
-  const monthName = isShort ? shortMonths[date.getMonth()] : months[date.getMonth()]
-  const day = date.getDate()
-  const year = date.getFullYear()
-
-  switch (granularity) {
-    case 'day':
-      return `${day} ${monthName}`
-    case 'week':
-      // Получаем номер недели в году
-      const firstDayOfYear = new Date(date.getFullYear(), 0, 1)
-      const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000
-      const weekNumber = Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7)
-      return isShort ? `W${weekNumber}` : `Неделя ${weekNumber}, ${monthName}`
-    case 'month':
-      return isShort ? monthName : `${monthName} ${year}`
-    case 'quarter':
-      const quarter = Math.floor(date.getMonth() / 3) + 1
-      return isShort ? `Q${quarter}` : `Q${quarter} ${year}`
-    case 'year':
-      return year.toString()
-    default:
-      return date.toLocaleDateString('ru-RU')
-  }
+  return formatRussianDate(date, granularity, isShort)
 }
 
 /**
