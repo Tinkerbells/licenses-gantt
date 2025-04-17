@@ -49,7 +49,7 @@ export function getRussianMonth(month: number, padezh: 'genitive' | 'nominative'
  * @param isShort Использовать короткое название
  * @returns Отформатированная строка даты
  */
-export function formatRussianDate(date: Date, granularity: string, isShort: boolean = false): string {
+export function formatRussianDate(date: Date, granularity: string, isShort: boolean = true): string {
   const day = date.getDate()
   const month = date.getMonth()
   const year = date.getFullYear()

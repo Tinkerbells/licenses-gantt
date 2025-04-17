@@ -51,11 +51,11 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     width: dimensions.width,
     height: dimensions.height,
     margin: { top: 80, right: 30, bottom: 100, left: 100 },
-    barHeight: 30,
+    barHeight: 80,
     barPadding: 10,
     brushHeight: 40,
     vBrushWidth: 40,
-    dotThreshold: 0.7, // Пороговое значение масштаба для отображения точек
+    dotThreshold: 0.5, // Пороговое значение масштаба для отображения точек
     dotRadius: 5, // Радиус точек при масштабировании
   }
 
@@ -668,11 +668,11 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
           .text(d => getDateFormatByZoomScale(d as Date, newGranularity, transform.k))
 
         zoomGroup.select('.current-date-line')
-          .attr('x1', d => newXScale(now))
-          .attr('x2', d => newXScale(now))
+          .attr('x1', () => newXScale(now))
+          .attr('x2', () => newXScale(now))
 
         zoomGroup.select('.current-date-label')
-          .attr('x', d => newXScale(now))
+          .attr('x', () => newXScale(now))
 
         // Обновляем положение лицензий
         licensesSvg.selectAll('.license-container').each(function () {
