@@ -102,7 +102,6 @@ export interface ExtendedLicense {
   company: string // Название компании
   date: string // Дата окончания лицензии в формате YYYY-MM-DD
   amount: number // Количество лицензий
-  startDate: Date // Дата начала отображения на диаграмме
   endDate: Date // Дата окончания отображения на диаграмме
   position: number // Позиция по вертикали (процент)
   status: 'active' | 'expired' | 'renewal' // Статус лицензии

@@ -11,6 +11,8 @@ interface LicenseItemProps {
   xScale: d3.ScaleTime<number, number>
   yPosition: number
   barHeight: number
+  barWidth: number
+  zoomScale: number
   onMouseEnter: (event: React.MouseEvent, license: ExtendedLicense) => void
   onMouseLeave: () => void
 }
@@ -23,12 +25,17 @@ export const LicenseItem: React.FC<LicenseItemProps> = ({
   xScale,
   yPosition,
   barHeight,
+  barWidth,
+  zoomScale,
   onMouseEnter,
   onMouseLeave,
 }) => {
   // Рассчитываем позиции и размеры
-  const x = xScale(license.startDate)
-  const width = Math.max(50, xScale(license.endDate) - xScale(license.startDate))
+  // x - это позиция правого края элемента (соответствует дате окончания)
+  const x = xScale(license.endDate)
+
+  // Фиксированная ширина, которая масштабируется с зумом
+  const width = barWidth * Math.min(2, Math.max(0.5, zoomScale))
 
   // Получаем статус для стилизации
   const getStatusClass = () => {
@@ -57,9 +64,9 @@ export const LicenseItem: React.FC<LicenseItemProps> = ({
       onMouseEnter={e => onMouseEnter(e, license)}
       onMouseLeave={onMouseLeave}
     >
-      {/* Фон лицензии */}
+      {/* Фон лицензии - размещаем от позиции x-width (левый край) */}
       <rect
-        x={x}
+        x={x - width}
         y={-barHeight / 2}
         width={width}
         height={barHeight}
@@ -70,7 +77,7 @@ export const LicenseItem: React.FC<LicenseItemProps> = ({
 
       {/* Статус лицензии */}
       <text
-        x={x + 10}
+        x={x - width + 10}
         y={-barHeight / 4 + 2}
         className="status-label"
         fontSize="10px"
@@ -80,7 +87,7 @@ export const LicenseItem: React.FC<LicenseItemProps> = ({
 
       {/* Название лицензии */}
       <text
-        x={x + 10}
+        x={x - width + 10}
         y={barHeight / 4 + 2}
         className="license-name"
         fontSize="10px"
@@ -91,7 +98,7 @@ export const LicenseItem: React.FC<LicenseItemProps> = ({
 
       {/* Информация о количестве и сроке */}
       <text
-        x={x + width - 10}
+        x={x - 10}
         y={-barHeight / 4 + 2}
         textAnchor="end"
         className="amount-label"
@@ -106,7 +113,7 @@ export const LicenseItem: React.FC<LicenseItemProps> = ({
       {/* Информация о стоимости */}
       {license.totalPrice && (
         <text
-          x={x + width - 10}
+          x={x - 10}
           y={barHeight / 4 + 2}
           textAnchor="end"
           className="price-label"

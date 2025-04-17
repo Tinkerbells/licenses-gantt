@@ -59,24 +59,13 @@ export class LicenseService {
       // Создаем дату окончания лицензии
       const endDate = new Date(license.expirationDate)
 
-      // Создаем дату начала лицензии на основе срока
-      const startDate = new Date(endDate)
-      if (license.term === '1 год') {
-        startDate.setFullYear(startDate.getFullYear() - 1)
-      }
-      else {
-        // Для бессрочных или других типов отображаем начало за 3 месяца до окончания
-        startDate.setMonth(startDate.getMonth() - 3)
-      }
-
       extendedLicenses.push({
         id: `lic-${license.id}`,
         title: license.articleCode,
         company: license.customer,
         date: license.expirationDate,
         amount: license.quantity,
-        startDate, // Будет рассчитано
-        endDate, // Дата окончания
+        endDate, // Только дата окончания
         position: 0, // Будет рассчитано позже
         status: 'active', // Будет рассчитано позже
         articleCode: license.articleCode,

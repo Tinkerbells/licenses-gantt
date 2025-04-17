@@ -35,7 +35,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
   const [error, setError] = useState<string | null>(null)
   const [dimensions, setDimensions] = useState({ width, height })
   const [granularity, setGranularity] = useState<DateGranularityType>('month')
-  const [currentZoomScale, setCurrentZoomScale] = useState<number>(1) // Добавляем отслеживание масштаба
+  const [currentZoomScale, setCurrentZoomScale] = useState<number>(1) // Отслеживание масштаба
   const [tooltipInfo, setTooltipInfo] = useState<{
     license: ExtendedLicense | null
     position: { x: number, y: number }
@@ -53,6 +53,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     margin: { top: 80, right: 30, bottom: 100, left: 100 },
     barHeight: 80,
     barPadding: 10,
+    barWidth: 150, // Базовая фиксированная ширина элемента лицензии
     brushHeight: 40,
     vBrushWidth: 40,
     dotThreshold: 0.5, // Пороговое значение масштаба для отображения точек
@@ -183,13 +184,14 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     d3.select(chartRef.current).selectAll('*').remove()
 
     // Настройка размеров и отступов
-    const { width, height, margin, barHeight, brushHeight, vBrushWidth } = config
+    const { width, height, margin, barHeight, barWidth, brushHeight, vBrushWidth } = config
     const innerWidth = width - margin.left - margin.right
     const innerHeight = height - margin.top - margin.bottom - 80 // Отведем место для заголовка
 
-    // Определяем временной диапазон для данных
-    const minDate = d3.min(data, d => d.startDate) || new Date(2024, 0, 1)
+    // Определяем временной диапазон для данных (теперь только по дате окончания)
     const maxDate = d3.max(data, d => d.endDate) || new Date(2026, 0, 1)
+    // Находим самую раннюю дату окончания для построения диапазона
+    const minDate = d3.min(data, d => d.endDate) || new Date(2024, 0, 1)
 
     // Добавляем запас по времени
     const timeBuffer = (maxDate.getTime() - minDate.getTime()) * 0.1
@@ -432,8 +434,10 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
         .attr('class', 'license-container')
 
       // Создаем параметры для отрисовки
-      const x = xScale(license.startDate)
-      const width = Math.max(50, xScale(license.endDate) - xScale(license.startDate))
+      // X - это координата даты окончания (правый край)
+      const x = xScale(license.endDate)
+      // Ширина фиксированная, но масштабируемая
+      const width = barWidth * Math.min(2, Math.max(0.5, currentZoomScale))
       const yPos = yScale(license.position)
 
       // Определяем цвет в зависимости от статуса
@@ -469,9 +473,9 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
       const fullViewGroup = licenseG.append('g')
         .attr('class', 'license-full-view')
 
-      // Добавляем прямоугольник лицензии
+      // Добавляем прямоугольник лицензии (позиционируем от даты окончания)
       fullViewGroup.append('rect')
-        .attr('x', x)
+        .attr('x', x - width) // Выравниваем по правому краю (дате окончания)
         .attr('y', yPos - barHeight / 2)
         .attr('width', width)
         .attr('height', barHeight)
@@ -503,7 +507,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
       // Добавляем статус лицензии
       fullViewGroup.append('text')
-        .attr('x', x + 10)
+        .attr('x', x - width + 10) // Сдвигаем от левого края
         .attr('y', yPos - 5)
         .attr('class', 'status-label')
         .style('font-size', '10px')
@@ -515,7 +519,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
       // Добавляем название лицензии
       fullViewGroup.append('text')
-        .attr('x', x + 10)
+        .attr('x', x - width + 10) // Сдвигаем от левого края
         .attr('y', yPos + 10)
         .attr('class', 'license-name')
         .style('font-size', '10px')
@@ -526,7 +530,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
       // Добавляем количество и цену
       fullViewGroup.append('text')
-        .attr('x', x + width - 10)
+        .attr('x', x - 10) // Сдвигаем от правого края
         .attr('y', yPos - 5)
         .attr('text-anchor', 'end')
         .attr('class', 'amount-label')
@@ -537,7 +541,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
       // Добавляем срок лицензии
       fullViewGroup.append('text')
-        .attr('x', x + width - 10)
+        .attr('x', x - 10) // Сдвигаем от правого края
         .attr('y', yPos + 10)
         .attr('text-anchor', 'end')
         .attr('class', 'term-label')
@@ -551,9 +555,9 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
         .attr('class', 'license-dot-view')
         .style('display', 'none') // Изначально скрываем
 
-      // Добавляем точку для компактного представления
+      // Добавляем точку для компактного представления - позиционируем по дате окончания
       dotViewGroup.append('circle')
-        .attr('cx', x + width / 2)
+        .attr('cx', x)
         .attr('cy', yPos)
         .attr('r', config.dotRadius)
         .style('fill', getDotColor(license.status))
@@ -582,7 +586,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
       // Добавляем дату для компактного представления
       dotViewGroup.append('text')
-        .attr('x', x + width / 2)
+        .attr('x', x)
         .attr('y', yPos - 10)
         .attr('text-anchor', 'middle')
         .attr('class', 'date-label')
@@ -681,39 +685,40 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
           const fullView = licenseG.select('.license-full-view')
           const dotView = licenseG.select('.license-dot-view')
 
-          const x = newXScale(license.startDate)
-          const width = Math.max(50, newXScale(license.endDate) - newXScale(license.startDate))
+          // Фиксированная ширина, масштабируемая в зависимости от зума
+          const scaledWidth = barWidth * Math.min(2, Math.max(0.5, transform.k))
+          const x = newXScale(license.endDate) // Позиция правого края (дата окончания)
           const yPos = newYScale(license.position)
 
           // Обновляем полное представление
           fullView.select('rect')
-            .attr('x', x)
+            .attr('x', x - scaledWidth)
             .attr('y', yPos - barHeight / 2)
-            .attr('width', width)
+            .attr('width', scaledWidth)
 
           fullView.select('.status-label')
-            .attr('x', x + 10)
+            .attr('x', x - scaledWidth + 10)
             .attr('y', yPos - 5)
 
           fullView.select('.license-name')
-            .attr('x', x + 10)
+            .attr('x', x - scaledWidth + 10)
             .attr('y', yPos + 10)
 
           fullView.select('.amount-label')
-            .attr('x', x + width - 10)
+            .attr('x', x - 10)
             .attr('y', yPos - 5)
 
           fullView.select('.term-label')
-            .attr('x', x + width - 10)
+            .attr('x', x - 10)
             .attr('y', yPos + 10)
 
           // Обновляем точечное представление
           dotView.select('circle')
-            .attr('cx', x + width / 2)
+            .attr('cx', x)
             .attr('cy', yPos)
 
           dotView.select('.date-label')
-            .attr('x', x + width / 2)
+            .attr('x', x)
             .attr('y', yPos - 10)
             .text(transform.k < 0.7
               ? d3.timeFormat('%d.%m')(license.endDate)
@@ -894,39 +899,41 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
               .text(getDateFormatByZoomScale(date, newGranularity, scaleRatio))
           })
 
-        // Обновляем положение лицензий
+        // Обновляем положение лицензий с фиксированной шириной
         licensesSvg.selectAll('.license-container').each(function () {
           const license = d3.select(this).datum() as ExtendedLicense
           const licenseG = d3.select(this)
           const fullView = licenseG.select('.license-full-view')
           const dotView = licenseG.select('.license-dot-view')
 
-          const x = newXScale(license.startDate)
-          const width = Math.max(50, newXScale(license.endDate) - newXScale(license.startDate))
+          // Фиксированная ширина, масштабируемая в зависимости от зума
+          const scaledWidth = barWidth * Math.min(2, Math.max(0.5, scaleRatio))
+          // Используем только дату окончания (правый край)
+          const x = newXScale(license.endDate)
 
           // Обновляем полное представление
           fullView.select('rect')
-            .attr('x', x)
-            .attr('width', width)
+            .attr('x', x - scaledWidth)
+            .attr('width', scaledWidth)
 
           fullView.select('.status-label')
-            .attr('x', x + 10)
+            .attr('x', x - scaledWidth + 10)
 
           fullView.select('.license-name')
-            .attr('x', x + 10)
+            .attr('x', x - scaledWidth + 10)
 
           fullView.select('.amount-label')
-            .attr('x', x + width - 10)
+            .attr('x', x - 10)
 
           fullView.select('.term-label')
-            .attr('x', x + width - 10)
+            .attr('x', x - 10)
 
           // Обновляем точечное представление
           dotView.select('circle')
-            .attr('cx', x + width / 2)
+            .attr('cx', x)
 
           dotView.select('.date-label')
-            .attr('x', x + width / 2)
+            .attr('x', x)
             .text(scaleRatio < 0.7
               ? d3.timeFormat('%d.%m')(license.endDate)
               : d3.timeFormat('%d.%m.%Y')(license.endDate))
