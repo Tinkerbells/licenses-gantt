@@ -57,7 +57,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     barWidth: 150, // Базовая фиксированная ширина элемента лицензии
     brushHeight: 40,
     vBrushWidth: 40,
-    dotThreshold: 0.7, // Увеличиваем пороговое значение масштаба для отображения точек
+    dotThreshold: 0.8, // Увеличиваем пороговое значение масштаба для отображения точек
     dotRadius: 5, // Радиус точек при масштабировании
   }
 
