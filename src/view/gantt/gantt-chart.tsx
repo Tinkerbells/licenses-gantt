@@ -54,7 +54,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     margin: { top: 80, right: 30, bottom: 100, left: 100 },
     barHeight: 80,
     barPadding: 10,
-    barWidth: 150, // Базовая фиксированная ширина элемента лицензии
+    barWidth: 350, // Базовая фиксированная ширина элемента лицензии
     brushHeight: 40,
     vBrushWidth: 40,
     dotThreshold: 0.8, // Увеличиваем пороговое значение масштаба для отображения точек
@@ -569,7 +569,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
         .style('font-weight', 'bold')
         .style('fill', '#444')
         .style('pointer-events', 'none')
-        .text(license.title)
+        .text(license.company)
 
       // Добавляем количество и цену
       fullViewGroup.append('text')
@@ -581,17 +581,6 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
         .style('fill', '#0078d4')
         .style('pointer-events', 'none')
         .text(`${license.amount} шт.`)
-
-      // Добавляем срок лицензии
-      fullViewGroup.append('text')
-        .attr('x', x - 10) // Сдвигаем от правого края
-        .attr('y', yPos + 10)
-        .attr('text-anchor', 'end')
-        .attr('class', 'term-label')
-        .style('font-size', '10px')
-        .style('fill', '#666')
-        .style('pointer-events', 'none')
-        .text(license.term || '')
 
       // Группа для компактного представления (точки)
       const dotViewGroup = licenseG.append('g')
