@@ -102,7 +102,7 @@ export class LicenseService {
     // Рассчитываем параметры для каждой лицензии
     return sortedLicenses.map((license, index) => {
       // Определяем вертикальную позицию (20% до 120% с равномерным распределением)
-      const position = 20 + (index * 100) / (sortedLicenses.length > 1 ? sortedLicenses.length - 1 : 1)
+      const position = 20 + (index * 500) / (sortedLicenses.length > 1 ? sortedLicenses.length - 1 : 1)
 
       // Определяем статус лицензии
       let status: 'active' | 'expired' | 'renewal'
