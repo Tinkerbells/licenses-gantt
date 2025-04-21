@@ -479,27 +479,8 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
       // X - это координата даты окончания (правый край)
       const x = xScale(license.endDate)
       // Ширина фиксированная, но масштабируемая
-      const width = barWidth * Math.min(2, Math.max(0.5, currentZoomScale))
+      const width = barWidth * Math.min(2, Math.max(0.8, currentZoomScale))
       const yPos = yScale(license.position)
-
-      // Определяем цвет в зависимости от статуса
-      const getFillColor = (status: string) => {
-        switch (status) {
-          case 'active': return '#e6f2ff'
-          case 'expired': return '#ffe6e6'
-          case 'renewal': return '#fff9e6'
-          default: return '#f5f5f5'
-        }
-      }
-
-      const getStrokeColor = (status: string) => {
-        switch (status) {
-          case 'active': return '#a9d1f7'
-          case 'expired': return '#ffb3b3'
-          case 'renewal': return '#ffd480'
-          default: return '#cccccc'
-        }
-      }
 
       // Определяем цвет точки (для отображения при масштабировании)
       const getDotColor = (status: string) => {
@@ -521,11 +502,11 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
         .attr('y', yPos - barHeight / 2)
         .attr('width', width)
         .attr('height', barHeight)
-        .attr('rx', 4)
-        .attr('ry', 4)
+        .attr('rx', 12)
+        .attr('ry', 12)
         .attr('class', `license-bar license-${license.status}`)
-        .style('fill', getFillColor(license.status))
-        .style('stroke', getStrokeColor(license.status))
+        .style('fill', 'var(--xenon-color-bg-container)')
+        // .style('stroke', getStrokeColor(license.status))
         .style('cursor', 'pointer')
         .style('pointer-events', 'all')
         .on('mouseenter', function (event) {
@@ -551,24 +532,17 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
       fullViewGroup.append('text')
         .attr('x', x - width + 10) // Сдвигаем от левого края
         .attr('y', yPos - 5)
-        .attr('class', 'status-label')
-        .style('font-size', '10px')
-        .style('fill', '#666')
+        .attr('class', 'status-label xenon-typography xenon-typography_color-primary xenon-typography_level-body')
         .style('pointer-events', 'none')
-        .text(license.status === 'active'
-          ? 'Активна'
-          : license.status === 'expired' ? 'Истекла' : 'Требуется продление')
+        .text(license.company)
 
       // Добавляем название лицензии
       fullViewGroup.append('text')
         .attr('x', x - width + 10) // Сдвигаем от левого края
-        .attr('y', yPos + 10)
-        .attr('class', 'license-name')
-        .style('font-size', '8px')
-        .style('font-weight', 'bold')
-        .style('fill', '#444')
+        .attr('y', yPos + 20)
+        .attr('class', 'license-name xenon-typography xenon-typography_color-primary xenon-typography_style-strong xenon-typography_level-body')
         .style('pointer-events', 'none')
-        .text(license.company)
+        .text(Number(license.unitPrice))
 
       // Добавляем количество и цену
       fullViewGroup.append('text')
