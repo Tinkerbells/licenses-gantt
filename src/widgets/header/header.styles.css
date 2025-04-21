@@ -1,0 +1,37 @@
+.header {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--xenon-padding-sm);
+}
+
+/* Navbar */
+.header__navbar {
+  width: 50%;
+  margin-right: auto;
+}
+
+.header__navbar li:nth-child(1) {
+  pointer-events: none;
+  color: var(--xenon-color-primary) !important;
+}
+
+.header__navbar li:nth-child(1) svg {
+  margin-bottom: -1rem;
+}
+
+/* User info */
+.header__user span {
+  white-space: nowrap;
+}
+
+/* Avatar */
+.header__avatar {
+  aspect-ratio: 1 / 1;
+  width: var(--xenon-control-height);
+  height: var(--xenon-control-height);
+}
+
+/* Theme picker */
+.xenon-theme-picker {
+  z-index: 0;
+}

@@ -1,36 +1,14 @@
 /* Основной контейнер */
 .license-gantt-container {
   position: fixed;
-  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   width: 100vw;
-  height: 100vh;
+  height: calc(100% - var(--xenon-layout-header-height));
   overflow: hidden;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
-    Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   display: flex;
   flex-direction: column;
-}
-
-/* Заголовок */
-.gantt-header {
-  background-color: #f0f8ff;
-  padding: 10px 20px;
-  border-bottom: 1px solid #e0e0e0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 10;
-}
-
-.gantt-header h1 {
-  font-size: 18px;
-  font-weight: 500;
-  color: #333;
-  margin: 0;
 }
 
 .gantt-stats {
@@ -70,7 +48,7 @@
 
 /* Стили для SVG элементов */
 .gantt-chart {
-  background-color: #ffffff;
+  background-color: var(--xenon-color-bg-layout);
 }
 
 /* Стили для сетки */
@@ -171,14 +149,14 @@
 }
 
 .brush .selection {
-  fill: #cce4f7;
-  stroke: #0078d4;
+  fill: #8fa7c1;
+  stroke: var(--xenon-color-primary);
   stroke-width: 1px;
 }
 
 .brush .handle {
-  fill: #0078d4;
-  stroke: #005a9e;
+  fill: var(--xenon-color-primary);
+  stroke: var(--xenon-color-primary);
 }
 
 .brush-date-label {

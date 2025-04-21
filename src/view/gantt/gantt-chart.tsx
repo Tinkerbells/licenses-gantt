@@ -13,7 +13,6 @@ import {
   prepareLicenseData,
 } from '@/utils/gantt-utils'
 
-import { GanttHeader } from './gantt-header'
 import { LicenseTooltip } from './license-tooltip'
 
 interface LicenseGanttChartProps {
@@ -54,7 +53,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     margin: { top: 80, right: 30, bottom: 100, left: 100 },
     barHeight: 80,
     barPadding: 10,
-    barWidth: 350, // Базовая фиксированная ширина элемента лицензии
+    barWidth: 150, // Базовая фиксированная ширина элемента лицензии
     brushHeight: 40,
     vBrushWidth: 40,
     dotThreshold: 0.8, // Увеличиваем пороговое значение масштаба для отображения точек
@@ -125,7 +124,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     const visibleTicks = generateAllTimeTicks(visibleRange[0], visibleRange[1])
 
     // Выбор тиков в зависимости от гранулярности и масштаба
-    if (zoomScale < 0.7) {
+    if (zoomScale < 0.9) {
       // При сильном отдалении показываем только месяцы или кварталы
       switch (granularity) {
         case 'day':
@@ -565,7 +564,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
         .attr('x', x - width + 10) // Сдвигаем от левого края
         .attr('y', yPos + 10)
         .attr('class', 'license-name')
-        .style('font-size', '10px')
+        .style('font-size', '8px')
         .style('font-weight', 'bold')
         .style('fill', '#444')
         .style('pointer-events', 'none')
@@ -651,8 +650,8 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     horizontalBrushGroup.append('rect')
       .attr('width', innerWidth)
       .attr('height', brushHeight)
-      .attr('fill', '#f5f5f5')
-      .attr('stroke', '#ddd')
+      .attr('fill', 'var(--xenon-color-bg-container)')
+      .attr('stroke', 'var(--xenon-color-border)')
       .attr('rx', 4)
       .attr('ry', 4)
 
@@ -660,14 +659,14 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     const brushTimeAxis = d3.axisBottom(brushTimeScale)
       .tickFormat((d) => {
         const date = d as Date
-        return d3.timeFormat('%d.%m.%Y')(date)
+        return d3.timeFormat('%d.%m')(date)
       })
       .ticks(d3.timeMonth.every(3))
 
     horizontalBrushGroup.append('g')
       .attr('class', 'brush-time-axis')
       .attr('transform', `translate(0, ${brushHeight - 20})`)
-      .call(brushTimeAxis as any)
+      .call(brushTimeAxis)
 
     // Создаем маркеры кварталов
     const quarterTicks = allTimeTicks.quarters
@@ -710,6 +709,8 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
         // Если метки еще нет, создаем ее
         if (dateLabel.empty()) {
+          // eslint-disable-next-line ts/ban-ts-comment
+          // @ts-ignore
           dateLabel = selectionRect.append('text')
             .attr('class', 'brush-date-label')
             .attr('text-anchor', 'middle')
@@ -823,7 +824,11 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
           const currentTransform = d3.zoomTransform(svg.node()!)
 
           // Устанавливаем зум-трансформацию для синхронизации с brush
+          // eslint-disable-next-line ts/ban-ts-comment
+          // @ts-ignore
           currentTransform.k = innerWidth / (x1 - x0)
+          // eslint-disable-next-line ts/ban-ts-comment
+          // @ts-ignore
           currentTransform.x = -x0 * currentTransform.k
 
           // Обновляем сохраненную трансформацию
@@ -831,6 +836,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
           // Применяем трансформацию без вызова обработчика события (чтобы избежать циклических вызовов)
           isZooming = true
+          // eslint-disable-next-line ts/no-use-before-define
           svg.call(zoom.transform as any, currentTransform)
           isZooming = false
         }
@@ -843,8 +849,8 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
     // Стилизуем handles (ручки) brush
     horizontalBrushGroup.selectAll('.handle')
-      .attr('fill', '#0078d4')
-      .attr('stroke', '#005a9e')
+      .attr('fill', 'var(--xenon-color-primary)')
+      .attr('stroke', 'var(--xenon-color-primary)')
       .attr('rx', 3)
       .attr('ry', 3)
 
@@ -871,8 +877,8 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     verticalBrushGroup.append('rect')
       .attr('width', vBrushWidth)
       .attr('height', innerHeight)
-      .attr('fill', '#f5f5f5')
-      .attr('stroke', '#ddd')
+      .attr('fill', 'var(--xenon-color-bg-container)')
+      .attr('stroke', 'var(--xenon-color-border)')
       .attr('rx', 3)
       .attr('ry', 3)
 
@@ -951,6 +957,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
           // Применяем трансформацию без вызова обработчика события
           isZooming = true
+          // eslint-disable-next-line ts/no-use-before-define
           svg.call(zoom.transform as any, newTransform)
           isZooming = false
         }
@@ -963,14 +970,14 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
     // Стилизуем ручки вертикального brush
     verticalBrushGroup.selectAll('.handle')
-      .attr('fill', '#0078d4')
-      .attr('stroke', '#005a9e')
+      .attr('fill', 'var(--xenon-color-primary)')
+      .attr('stroke', 'var(--xenon-color-primary)')
       .attr('rx', 3)
       .attr('ry', 3)
 
     verticalBrushGroup.selectAll('.selection')
-      .attr('fill', '#cce4f7')
-      .attr('stroke', '#0078d4')
+      .attr('fill', 'var(--xenon-color-primary)')
+      .attr('stroke', 'var(--xenon-color-primary)')
       .attr('stroke-width', 1)
       .attr('rx', 3)
       .attr('ry', 3)
@@ -1199,7 +1206,6 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
   return (
     <div ref={containerRef} className="license-gantt-container">
-      {data.length > 0 && <GanttHeader licenses={data} />}
       <div ref={chartRef} className="license-gantt-chart"></div>
       <div id="tooltip-container" style={{ position: 'fixed', top: 0, left: 0, zIndex: 9999, pointerEvents: 'none' }}>
         <LicenseTooltip

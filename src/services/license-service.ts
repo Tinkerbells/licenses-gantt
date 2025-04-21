@@ -1,6 +1,6 @@
 import type { ExtendedLicense, LicensesApiData } from '../types/license.types'
 
-import mockJson from '../data.json'
+import mockJson from '../../src/data.json'
 
 /**
  * Класс для работы с API лицензий
