@@ -5,6 +5,7 @@ import './gantt-chart.styles.css'
 
 import type { DateGranularityType, ExtendedLicense } from '@/types/license.types'
 
+import { formatRub } from '@/shared/lib/utils/format-rub'
 import { LicenseService } from '@/services/license-service'
 import {
   determineDateGranularity,
@@ -53,10 +54,10 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     margin: { top: 80, right: 30, bottom: 100, left: 100 },
     barHeight: 80,
     barPadding: 10,
-    barWidth: 150, // Базовая фиксированная ширина элемента лицензии
+    barWidth: 200, // Базовая фиксированная ширина элемента лицензии
     brushHeight: 40,
     vBrushWidth: 40,
-    dotThreshold: 0.8, // Увеличиваем пороговое значение масштаба для отображения точек
+    dotThreshold: 0.9, // Увеличиваем пороговое значение масштаба для отображения точек
     dotRadius: 5, // Радиус точек при масштабировании
   }
 
@@ -104,7 +105,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
   // Функция форматирования даты в зависимости от текущего масштаба
   const getDateFormatByZoomScale = (date: Date, baseGranularity: DateGranularityType, zoomScale: number): string => {
     // При отдалении используем более компактный формат даты
-    if (zoomScale < 0.7) {
+    if (zoomScale < 1) {
       return d3.timeFormat('%d.%m')(date)
     }
     else if (zoomScale < 1.2) {
@@ -479,7 +480,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
       // X - это координата даты окончания (правый край)
       const x = xScale(license.endDate)
       // Ширина фиксированная, но масштабируемая
-      const width = barWidth * Math.min(2, Math.max(0.8, currentZoomScale))
+      const width = barWidth * Math.min(2, Math.max(0.5, currentZoomScale))
       const yPos = yScale(license.position)
 
       // Определяем цвет точки (для отображения при масштабировании)
@@ -510,7 +511,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
         .style('cursor', 'pointer')
         .style('pointer-events', 'all')
         .on('mouseenter', function (event) {
-          d3.select(this).style('fill-opacity', 0.8)
+          d3.select(this)
           setTooltipInfo({
             license,
             position: { x: event.clientX, y: event.clientY },
@@ -532,17 +533,16 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
       fullViewGroup.append('text')
         .attr('x', x - width + 10) // Сдвигаем от левого края
         .attr('y', yPos - 5)
-        .attr('class', 'status-label xenon-typography xenon-typography_color-primary xenon-typography_level-body')
+        .attr('class', 'status-label xenon-typography')
         .style('pointer-events', 'none')
         .text(license.company)
 
       // Добавляем название лицензии
       fullViewGroup.append('text')
         .attr('x', x - width + 10) // Сдвигаем от левого края
-        .attr('y', yPos + 20)
-        .attr('class', 'license-name xenon-typography xenon-typography_color-primary xenon-typography_style-strong xenon-typography_level-body')
+        .attr('class', 'license-name xenon-typography xenon-typography_style-strong')
         .style('pointer-events', 'none')
-        .text(Number(license.unitPrice))
+        .text(formatRub(Number(license.unitPrice)))
 
       // Добавляем количество и цену
       fullViewGroup.append('text')
@@ -550,8 +550,6 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
         .attr('y', yPos - 5)
         .attr('text-anchor', 'end')
         .attr('class', 'amount-label')
-        .style('font-size', '10px')
-        .style('fill', '#0078d4')
         .style('pointer-events', 'none')
         .text(`${license.amount} шт.`)
 
@@ -660,7 +658,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
     // Создаем горизонтальный brush
     const horizontalBrush = d3.brushX()
-      .extent([[0, 0], [innerWidth, brushHeight - 20]])
+      .extent([[0, 0], [innerWidth, brushHeight]])
       .on('brush end', (event) => {
         if (!event.selection)
           return
@@ -1061,7 +1059,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
           fullView.select('.license-name')
             .attr('x', x - scaledWidth + 10)
-            .attr('y', yPos + 10)
+            .attr('y', yPos + 15)
 
           fullView.select('.amount-label')
             .attr('x', x - 10)

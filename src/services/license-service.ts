@@ -1,6 +1,6 @@
-import type { ExtendedLicense, LicensesApiData } from '../types/license.types'
+import { env } from '@/shared/env'
 
-import mockJson from '../../src/data.json'
+import type { ExtendedLicense, LicensesApiData } from '../types/license.types'
 
 /**
  * Класс для работы с API лицензий
@@ -12,12 +12,12 @@ export class LicenseService {
    */
   static async getLicensesData(): Promise<LicensesApiData> {
     try {
-      // В реальном проекте здесь был бы fetch запрос к API
-      // const response = await fetch('/api/licenses')
-      // if (!response.ok) {
-      //   throw new Error(`Ошибка запроса: ${response.status}`)
-      // }
-      // return await response.json()
+      // В реальном проекте здесь мог бы быть fetch к API:
+      //   const response = await fetch('/api/licenses')
+      //   if (!response.ok) throw new Error(`Ошибка запроса: ${response.status}`)
+      //   return await response.json()
+
+      // А пока — читаем локальный JSON из public/
       return await this.getLocalData()
     }
     catch (error) {
@@ -28,22 +28,16 @@ export class LicenseService {
 
   /**
    * Получение локальных данных для тестирования
-   * @returns Данные лицензий из локального JSON
+   * @returns Данные лицензий из public/data.json
    */
-  static async getLocalData(): Promise<LicensesApiData> {
-    try {
-    // Используем импортированные данные вместо fetch
-      return await new Promise((resolve) => {
-        setTimeout(() => {
-        // Возвращаем импортированные данные из mockJson
-          resolve(mockJson as LicensesApiData)
-        }, 800) // Таймаут для имитации загрузки данных
-      })
+  private static async getLocalData(): Promise<LicensesApiData> {
+    const response = await fetch(`${env.BASE_URL}/data.json`)
+    if (!response.ok) {
+      throw new Error(`Не удалось загрузить локальные данные по адресу ${env.BASE_URL}/data.json: ${response.status}`)
     }
-    catch (error) {
-      console.error('Ошибка при загрузке локальных данных:', error)
-      throw error
-    }
+    // небольшая искусственная задержка, если хотите имитировать загрузку
+    await new Promise(r => setTimeout(r, 800))
+    return response.json()
   }
 
   /**
@@ -54,20 +48,17 @@ export class LicenseService {
   static prepareGanttData(data: LicensesApiData): ExtendedLicense[] {
     const extendedLicenses: ExtendedLicense[] = []
 
-    // Обрабатываем каждую лицензию из полученных данных
-    data.licenses.forEach((license) => {
-      // Создаем дату окончания лицензии
+    data.forEach((license) => {
       const endDate = new Date(license.expirationDate)
-
       extendedLicenses.push({
         id: `lic-${license.id}`,
         title: license.articleCode,
         company: license.customer,
         date: license.expirationDate,
         amount: license.quantity,
-        endDate, // Только дата окончания
-        position: 0, // Будет рассчитано позже
-        status: 'active', // Будет рассчитано позже
+        endDate,
+        position: 0,
+        status: 'active',
         articleCode: license.articleCode,
         productName: license.licenseName || undefined,
         term: license.term,
@@ -76,7 +67,6 @@ export class LicenseService {
       })
     })
 
-    // Рассчитываем дополнительные поля для визуализации
     return this.calculateVisualizationParams(extendedLicenses)
   }
 
@@ -86,43 +76,25 @@ export class LicenseService {
    * @returns Расширенные данные с параметрами для визуализации
    */
   private static calculateVisualizationParams(licenses: ExtendedLicense[]): ExtendedLicense[] {
-    // Сортируем по дате окончания и компании
-    const sortedLicenses = [...licenses].sort((a, b) => {
-      const dateA = new Date(a.date).getTime()
-      const dateB = new Date(b.date).getTime()
-
-      if (dateA === dateB) {
-        return a.company.localeCompare(b.company)
-      }
-      return dateA - dateB
+    const sorted = [...licenses].sort((a, b) => {
+      const tA = new Date(a.date).getTime()
+      const tB = new Date(b.date).getTime()
+      return tA === tB ? a.company.localeCompare(b.company) : tA - tB
     })
 
-    const now = new Date()
+    const now = Date.now()
+    return sorted.map((lic, i) => {
+      const position = 20 + (i * 500) / (sorted.length > 1 ? sorted.length - 1 : 1)
+      const expiresAt = new Date(lic.date).getTime()
 
-    // Рассчитываем параметры для каждой лицензии
-    return sortedLicenses.map((license, index) => {
-      // Определяем вертикальную позицию (20% до 120% с равномерным распределением)
-      const position = 20 + (index * 500) / (sortedLicenses.length > 1 ? sortedLicenses.length - 1 : 1)
-
-      // Определяем статус лицензии
       let status: 'active' | 'expired' | 'renewal'
-
-      if (new Date(license.date) < now) {
+      if (expiresAt < now)
         status = 'expired'
-      }
-      else if (new Date(license.date).getTime() - now.getTime() < 30 * 24 * 60 * 60 * 1000) {
-        // Если до истечения меньше 30 дней
+      else if (expiresAt - now < 30 * 24 * 60 * 60 * 1000)
         status = 'renewal'
-      }
-      else {
-        status = 'active'
-      }
+      else status = 'active'
 
-      return {
-        ...license,
-        position,
-        status,
-      }
+      return { ...lic, position, status }
     })
   }
 }

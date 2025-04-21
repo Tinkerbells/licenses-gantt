@@ -88,9 +88,7 @@ export interface Summary {
 /**
  * Полный набор данных, получаемый от API
  */
-export interface LicensesApiData {
-  licenses: LicenseData[]
-}
+export type LicensesApiData = LicenseData[]
 
 /**
  * Расширенный интерфейс лицензии для внутреннего использования в компоненте

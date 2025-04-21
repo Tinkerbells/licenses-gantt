@@ -4,7 +4,7 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
-  base: '/licenses-gantt',
+  base: '/licenses',
   resolve: {
     alias: [
       { find: '@', replacement: '/src' },

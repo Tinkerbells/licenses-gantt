@@ -10,7 +10,7 @@ import { AppRouter } from './app-router'
 const App: React.FC = () => {
   return (
     <BrowserRouter>
-      <ThemeProvider>
+      <ThemeProvider defaultTheme="light">
         <AppRouter />
       </ThemeProvider>
     </BrowserRouter>
