@@ -262,5 +262,27 @@
     "quantity": 1,
     "unitPrice": 107250.0,
     "totalPrice": 107250.0
+  },
+  {
+    "id": 25,
+    "expirationDate": "2024-12-31",
+    "customer": "ООО \"ГАЗПРОМ ТРАНСГАЗ ЕКАТЕРИНБУРГ\"",
+    "articleCode": "Подписка Directum",
+    "licenseName": "",
+    "term": "1 год",
+    "quantity": 1,
+    "unitPrice": 15885928.0,
+    "totalPrice": 15885928.0
+  },
+  {
+    "id": 26,
+    "expirationDate": "2026-04-17",
+    "customer": "ООО \"ГАЗПРОМ МЕЖРЕГИОНГАЗ ИНЖИНИРИНГ\"",
+    "articleCode": "АПКШ Континент СД 3.М 01425",
+    "licenseName": "Промышленная лицензия",
+    "term": "Бессрочный",
+    "quantity": 150,
+    "unitPrice": 11700.0,
+    "totalPrice": 1287000.0
   }
 ]

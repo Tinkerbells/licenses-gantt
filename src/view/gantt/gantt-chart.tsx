@@ -11,6 +11,7 @@ import {
   determineDateGranularity,
   formatDateByGranularity,
   generateAllTimeTicks,
+  getStrokeColor,
   prepareLicenseData,
 } from '@/utils/gantt-utils'
 
@@ -52,7 +53,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     width: dimensions.width,
     height: dimensions.height,
     margin: { top: 80, right: 30, bottom: 100, left: 100 },
-    barHeight: 80,
+    barHeight: 60,
     barPadding: 10,
     barWidth: 200, // Базовая фиксированная ширина элемента лицензии
     brushHeight: 40,
@@ -483,16 +484,6 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
       const width = barWidth * Math.min(2, Math.max(0.5, currentZoomScale))
       const yPos = yScale(license.position)
 
-      // Определяем цвет точки (для отображения при масштабировании)
-      const getDotColor = (status: string) => {
-        switch (status) {
-          case 'active': return '#2196f3'
-          case 'expired': return '#f44336'
-          case 'renewal': return '#ff9800'
-          default: return '#aaaaaa'
-        }
-      }
-
       // Группа для полного представления лицензии (прямоугольник с текстом)
       const fullViewGroup = licenseG.append('g')
         .attr('class', 'license-full-view')
@@ -507,7 +498,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
         .attr('ry', 12)
         .attr('class', `license-bar license-${license.status}`)
         .style('fill', 'var(--xenon-color-bg-container)')
-        // .style('stroke', getStrokeColor(license.status))
+        .style('stroke', getStrokeColor(license.status))
         .style('cursor', 'pointer')
         .style('pointer-events', 'all')
         .on('mouseenter', function (event) {
@@ -529,11 +520,28 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
           setTooltipInfo(prev => ({ ...prev, visible: false }))
         })
 
+      // fullViewGroup.append('rect')
+      //   .attr('x', x - width + 10) // Сдвигаем от левого края
+      //   .attr('width', 100)
+      //   .attr('height', 20)
+      //   .attr('rx', 12)
+      //   .attr('ry', 12)
+      //   .attr('class', 'status-indicator')
+      //   .style('fill', 'var(--xenon-color-bg-container)')
+      //   .style('stroke', getStrokeColor(license.status))
+      //
+      // fullViewGroup.append('text')
+      //   .attr('x', x - width + 10) // Сдвигаем от левого края
+      //   .attr('class', 'status-indicator-text')
+      //   .style('font-size', '12px')
+      //   .style('fill', getStrokeColor(license.status))
+      //   .text(license.status === 'renewal' ? 'Заканчивается' : (license.status === 'expired' ? 'Просрочена' : 'Активна'))
+
       // Добавляем статус лицензии
       fullViewGroup.append('text')
         .attr('x', x - width + 10) // Сдвигаем от левого края
-        .attr('y', yPos - 5)
         .attr('class', 'status-label xenon-typography')
+        .style('font-size', '14px')
         .style('pointer-events', 'none')
         .text(license.company)
 
@@ -541,17 +549,9 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
       fullViewGroup.append('text')
         .attr('x', x - width + 10) // Сдвигаем от левого края
         .attr('class', 'license-name xenon-typography xenon-typography_style-strong')
+        .style('font-size', '20px')
         .style('pointer-events', 'none')
-        .text(formatRub(Number(license.unitPrice)))
-
-      // Добавляем количество и цену
-      fullViewGroup.append('text')
-        .attr('x', x - 10) // Сдвигаем от правого края
-        .attr('y', yPos - 5)
-        .attr('text-anchor', 'end')
-        .attr('class', 'amount-label')
-        .style('pointer-events', 'none')
-        .text(`${license.amount} шт.`)
+        .text(formatRub(Number(license.totalPrice)))
 
       // Группа для компактного представления (точки)
       const dotViewGroup = licenseG.append('g')
@@ -563,7 +563,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
         .attr('cx', x)
         .attr('cy', yPos)
         .attr('r', config.dotRadius)
-        .style('fill', getDotColor(license.status))
+        .style('fill', getStrokeColor(license.status))
         .style('stroke', 'white')
         .style('stroke-width', 1)
         .style('cursor', 'pointer')
@@ -765,6 +765,11 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
           fullView.select('.status-label')
             .attr('x', x - scaledWidth + 10)
 
+          fullView.select('.status-indicator')
+            .attr('x', x - scaledWidth + 10)
+          fullView.select('.status-indicator-text')
+            .attr('x', x - scaledWidth + 10)
+
           fullView.select('.license-name')
             .attr('x', x - scaledWidth + 10)
 
@@ -896,6 +901,11 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
           fullView.select('.status-label')
             .attr('y', yPos - 5)
 
+          fullView.select('.status-indicator')
+            .attr('y', yPos - 5)
+          fullView.select('.status-indicator-text')
+            .attr('y', yPos - 5)
+
           fullView.select('.license-name')
             .attr('y', yPos + 10)
 
@@ -959,6 +969,13 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
       .scaleExtent([0.5, 10])
       .extent([[0, 0], [innerWidth, innerHeight]])
       .on('zoom', (event) => {
+        const calculateFontSize = (baseSize: number, zoomScale: number): number => {
+          const scaledSize = zoomScale >= 1.5 ? baseSize : baseSize * (zoomScale / 2)
+
+          const minSize = 7
+
+          return Math.max(minSize, scaledSize)
+        }
         if (isBrushing)
           return
         isZooming = true
@@ -1043,7 +1060,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
           const dotView = licenseG.select('.license-dot-view')
 
           // Фиксированная ширина, масштабируемая в зависимости от зума
-          const scaledWidth = barWidth * Math.min(2, Math.max(0.5, transform.k))
+          const scaledWidth = barWidth * Math.min(2, Math.max(0.3, transform.k))
           const x = newXScale(license.endDate) // Позиция правого края (дата окончания)
           const yPos = newYScale(license.position)
 
@@ -1055,15 +1072,26 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
           fullView.select('.status-label')
             .attr('x', x - scaledWidth + 10)
-            .attr('y', yPos - 5)
+            .attr('y', yPos - barHeight / 2 + 15)
+            .style('font-size', `${calculateFontSize(14, transform.k)}px`)
+
+          fullView.select('.status-indicator')
+            .attr('x', x - 115)
+            .attr('y', yPos + barHeight / 2 - 30)
+
+          fullView.select('.status-indicator-text')
+            .attr('x', x - 105)
+            .attr('y', yPos + barHeight / 2 - 17)
+            .style('font-size', `${calculateFontSize(12, transform.k)}px`)
 
           fullView.select('.license-name')
             .attr('x', x - scaledWidth + 10)
-            .attr('y', yPos + 15)
+            .attr('y', yPos + barHeight / 2 - 15)
+            .style('font-size', `${calculateFontSize(20, transform.k)}px`)
 
           fullView.select('.amount-label')
-            .attr('x', x - 10)
-            .attr('y', yPos - 5)
+            .attr('x', x - scaledWidth + 10)
+            .attr('y', yPos + barHeight / 2 - 30)
 
           fullView.select('.term-label')
             .attr('x', x - 10)

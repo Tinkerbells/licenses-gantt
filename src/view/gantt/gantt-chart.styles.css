@@ -129,9 +129,8 @@
 }
 
 .amount-label {
-  font-size: 10px;
-  fill: var(--xenon-color-primary);
-  font-weight: bold;
+  font-size: var(--xenon-font-sizesm);
+  fill: var(--xenon-color-text-tertiary);
 }
 
 .nav-arrow {
@@ -139,12 +138,12 @@
 }
 .license-name {
   fill: var(--xenon-color-text);
-  font-size: 10px;
+  /*font-size: 20px;*/
 }
 
 .status-label {
   fill: var(--xenon-color-text);
-  font-size: 10px;
+  /*font-size: 14px;*/
 }
 
 /* Стили для brush */

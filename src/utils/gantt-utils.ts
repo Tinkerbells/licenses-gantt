@@ -7,8 +7,7 @@ import { LicenseService } from '../services/license-service'
 
 /**
  * Подготовка данных лицензий для диаграммы Ганта
- * @param apiData Данные от API
- * @returns Массив расширенных данных лицензий
+ * @param apiData Данные от API @returns Массив расширенных данных лицензий
  */
 export function prepareLicenseData(apiData: LicensesApiData): ExtendedLicense[] {
   return LicenseService.prepareGanttData(apiData)
@@ -168,6 +167,19 @@ export function getLicenseStats(licenses: ExtendedLicense[]) {
     expiredLicenses,
     totalPrice,
     upcomingExpirations,
+  }
+}
+
+export function getStrokeColor(status: ExtendedLicense['status']) {
+  switch (status) {
+    case 'active':
+      return 'var(--xenon-color-primary)'
+    case 'expired':
+      return 'var(--xenon-color-error)'
+    case 'renewal':
+      return 'var(--xenon-color-warning)'
+    default:
+      return 'var(--xenon-color-primary)'
   }
 }
 
