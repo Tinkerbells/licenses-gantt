@@ -1086,7 +1086,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
           fullView.select('.license-name')
             .attr('x', x - scaledWidth + 10)
-            .attr('y', yPos + barHeight / 2 - 15)
+            .attr('y', yPos + barHeight / 2 - 10)
             .style('font-size', `${calculateFontSize(20, transform.k)}px`)
 
           fullView.select('.amount-label')
