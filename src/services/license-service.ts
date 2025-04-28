@@ -2,6 +2,8 @@ import { env } from '@/shared/env'
 
 import type { ExtendedLicense, LicensesApiData } from '../types/license.types'
 
+import { generateMockData } from './license-mock'
+
 /**
  * Класс для работы с API лицензий
  */
@@ -18,6 +20,9 @@ export class LicenseService {
       //   return await response.json()
 
       // А пока — читаем локальный JSON из public/
+      if (env.NODE_ENV === 'development') {
+        return generateMockData(100)
+      }
       return await this.getLocalData()
     }
     catch (error) {
