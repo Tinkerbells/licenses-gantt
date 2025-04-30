@@ -139,14 +139,11 @@ export function AggregationChart() {
     return (
       <LineChart
         tooltip={chart => (
-          <ChartTooltip chart={chart}>
+          <ChartTooltip offsetY={-50} chart={chart}>
             <ChartTooltipContent>
               {ctx => (
                 <>
                   <ChartTooltipItem>
-                    {ctx.series.name}
-                    :
-                    {' '}
                     <b>{Math.floor(Number(ctx.y))}</b>
                   </ChartTooltipItem>
                 </>

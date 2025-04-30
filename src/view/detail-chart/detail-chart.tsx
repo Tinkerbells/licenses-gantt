@@ -6,7 +6,6 @@ import { ChartTooltip, ChartTooltipContent, ChartTooltipItem, LineChart } from '
 
 import { useFilter } from '@/context/filter-context'
 import { formatRub } from '@/shared/lib/utils/format-rub'
-import { aggregateLicenseDataByVendor } from '@/utils/chart-utils'
 
 export function DetailChart() {
   const {
@@ -14,7 +13,6 @@ export function DetailChart() {
     loading,
     error,
     selectedVendor,
-    selectedCompany,
     dateRange,
   } = useFilter()
 
@@ -28,25 +26,43 @@ export function DetailChart() {
       return []
     }
 
-    // Агрегируем данные по каждому вендору
+    // Агрегируем данные по каждому вендору (независимо от компании)
     return selectedVendor.map((vendor) => {
-      const vendorData = aggregateLicenseDataByVendor(
-        licensesData,
-        vendor,
-        selectedCompany,
-        dateRange[0],
-        dateRange[1],
-      )
+      // Фильтруем данные только по вендору
+      const vendorData = licensesData.filter(license => license.articleCode === vendor)
+
+      // Применяем фильтр по диапазону дат, если он установлен
+      const dateFilteredData = vendorData.filter((license) => {
+        const licenseDate = new Date(license.expirationDate)
+        const startFilter = dateRange[0] ? licenseDate >= dateRange[0] : true
+        const endFilter = dateRange[1] ? licenseDate <= dateRange[1] : true
+        return startFilter && endFilter
+      })
+
+      // Группируем по датам и суммируем
+      const groupedByDate: Record<string, number> = {}
+      dateFilteredData.forEach((license) => {
+        const date = license.expirationDate
+        if (!groupedByDate[date]) {
+          groupedByDate[date] = 0
+        }
+        groupedByDate[date] += license.totalPrice
+      })
+
+      // Формируем массив точек для графика
+      const points = Object.entries(groupedByDate)
+        .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
+        .map(([date, value]) => ({
+          x: new Date(date).getTime(),
+          y: value / 1000, // Преобразуем в тысячи рублей
+        }))
 
       return {
         name: vendor,
-        data: vendorData.map(item => ({
-          x: new Date(item.date).getTime(),
-          y: item.value / 1000, // Преобразуем в тысячи рублей
-        })),
+        data: points,
       }
     }).filter(series => series.data.length > 0) // Убираем пустые серии
-  }, [licensesData, selectedVendor, selectedCompany, dateRange, loading])
+  }, [licensesData, selectedVendor, dateRange, loading])
 
   // Определяем максимальное значение для всех серий для настройки оси Y
   const maxValue = useMemo(() => {
@@ -150,18 +166,21 @@ export function DetailChart() {
     return (
       <LineChart
         tooltip={chart => (
-          <ChartTooltip chart={chart}>
+          <ChartTooltip offsetY={-50} chart={chart}>
             <ChartTooltipContent>
-              {ctx => (
-                <>
+              {(ctx) => {
+                // Вывод контекста в консоль при необходимости
+                // console.log('Tooltip context:', ctx);
+                return (
                   <ChartTooltipItem>
                     {ctx.series.name}
                     :
-                    {' '}
                     <b>{Math.floor(Number(ctx.y))}</b>
+                    {' '}
+                    т.р.
                   </ChartTooltipItem>
-                </>
-              )}
+                )
+              }}
             </ChartTooltipContent>
           </ChartTooltip>
         )}
@@ -194,7 +213,7 @@ export function DetailChart() {
 
   return (
     <Card
-      title={`Детализация по вендорам${selectedCompany ? ` (${selectedCompany})` : ''}, т.р.`}
+      title="Детализация по вендорам, т.р."
       className="detail-chart"
       size="small"
     >
