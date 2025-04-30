@@ -1,4 +1,6 @@
 .detail-chart {
   width: 40vw;
+  height: 100%;
   margin-right: 16px;
+  margin-bottom: 16px;
 }
