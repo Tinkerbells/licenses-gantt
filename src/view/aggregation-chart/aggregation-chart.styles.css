@@ -3,3 +3,59 @@
   margin-right: 16px;
   width: 40vw;
 }
+
+.chart-container {
+  height: 250px;
+  position: relative;
+}
+
+.chart-loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.aggregation-stats {
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 16px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-label {
+  color: var(--xenon-color-text-secondary);
+  font-size: var(--xenon-font-sizesm);
+}
+
+.stat-value {
+  color: var(--xenon-color-text);
+  font-weight: 600;
+  font-size: var(--xenon-font-size);
+}
+
+.stat-date {
+  color: var(--xenon-color-text-secondary);
+  font-size: var(--xenon-font-sizesm);
+}
+
+@media (max-width: 768px) {
+  .aggregation-chart {
+    width: 90vw;
+    margin-left: 16px;
+  }
+
+  .aggregation-stats {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
