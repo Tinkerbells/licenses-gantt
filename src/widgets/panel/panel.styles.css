@@ -1,0 +1,8 @@
+.panel {
+  background: var(--xenon-color-bg-container, #fff);
+  border-radius: var(--xenon-border-radius-lg);
+  padding: 12px;
+  margin-top: 12px;
+  margin-left: 16px;
+  margin-right: 16px;
+}

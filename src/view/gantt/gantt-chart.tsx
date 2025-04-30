@@ -23,8 +23,8 @@ interface LicenseGanttChartProps {
 }
 
 export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
-  width = window.innerWidth,
-  height = window.innerHeight,
+  width = window.innerWidth / 2,
+  height = window.innerHeight - 100,
 }) => {
   // Refs для DOM-элементов
   const containerRef = useRef<HTMLDivElement>(null)
@@ -90,8 +90,8 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     const handleResize = () => {
       if (containerRef.current) {
         setDimensions({
-          width: window.innerWidth,
-          height: window.innerHeight,
+          width: window.innerWidth / 2,
+          height: window.innerHeight - 100,
         })
       }
     }

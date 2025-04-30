@@ -4,7 +4,6 @@
   padding: 0 var(--xenon-padding-sm);
 }
 
-/* Navbar */
 .header__navbar {
   width: 50%;
   margin-right: auto;
@@ -19,19 +18,16 @@
   margin-bottom: -1rem;
 }
 
-/* User info */
 .header__user span {
   white-space: nowrap;
 }
 
-/* Avatar */
 .header__avatar {
   aspect-ratio: 1 / 1;
   width: var(--xenon-control-height);
   height: var(--xenon-control-height);
 }
 
-/* Theme picker */
 .xenon-theme-picker {
   z-index: 0;
 }
