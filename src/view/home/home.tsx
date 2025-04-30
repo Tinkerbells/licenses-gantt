@@ -9,7 +9,7 @@ export function Home() {
   return (
     <Flex justify="space-between" className="home-page">
       <LicenseGanttChart />
-      <Flex vertical gap="small" className='right-charts'>
+      <Flex vertical gap="small" className="right-charts">
         <AggregationChart />
         <DetailChart />
       </Flex>

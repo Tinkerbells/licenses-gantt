@@ -23,8 +23,8 @@ interface FilterContextType {
   // Фильтры
   selectedCompany: string | null
   setSelectedCompany: (company: string | null) => void
-  selectedVendor: string | null
-  setSelectedVendor: (vendor: string | null) => void
+  selectedVendor: string[] | null // Изменено на массив строк
+  setSelectedVendor: (vendor: string[] | null) => void
   dateRange: [Date | null, Date | null]
   setDateRange: (range: [Date | null, Date | null]) => void
 
@@ -66,7 +66,7 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
 
   // Состояния для фильтров
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null)
-  const [selectedVendor, setSelectedVendor] = useState<string | null>(null)
+  const [selectedVendor, setSelectedVendor] = useState<string[] | null>(null)
   const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null])
 
   // Загрузка данных
@@ -121,9 +121,9 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
       ? licensesData.filter(license => license.customer === selectedCompany)
       : licensesData
 
-    // Фильтруем по вендору, если указан
-    const vendorFilteredData = selectedVendor
-      ? filteredData.filter(license => license.articleCode === selectedVendor)
+    // Фильтруем по вендору, если указан (только первый вендор для агрегационного графика)
+    const vendorFilteredData = selectedVendor && selectedVendor.length > 0
+      ? filteredData.filter(license => license.articleCode === selectedVendor[0])
       : filteredData
 
     // Фильтруем по диапазону дат, если указан

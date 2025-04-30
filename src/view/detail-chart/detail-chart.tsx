@@ -1,294 +1,207 @@
 import './detail-chart.styles.css'
-import { Card } from '@tinkerbells/xenon-ui'
-import { LineChart } from '@tinkerbells/xenon-charts'
 
-const lineChartBaseOptions: Highcharts.Options = {
-  chart: {
-    type: 'line',
-    height: `${(226 / 701) * 100}%`,
-  },
-  title: false,
-  subtitle: false,
-  series: [
-    {
-      type: 'line',
-      marker: {
-        enabled: false,
-      },
-      name: 'Item 1',
-      data: [
-        {
-          x: 1672531200000,
-          y: 226,
-        },
-        {
-          x: 1675209600000,
-          y: 246,
-        },
-        {
-          x: 1677628800000,
-          y: 489,
-        },
-        {
-          x: 1680307200000,
-          y: 491,
-        },
-        {
-          x: 1682899200000,
-          y: 142,
-        },
-        {
-          x: 1685577600000,
-          y: 644,
-        },
-        {
-          x: 1688169600000,
-          y: 374,
-        },
-      ],
-    },
-    {
-      type: 'line',
-      marker: {
-        enabled: false,
-      },
-      name: 'Item 2',
-      data: [
-        {
-          x: 1672531200000,
-          y: 341,
-        },
-        {
-          x: 1675209600000,
-          y: 583,
-        },
-        {
-          x: 1677628800000,
-          y: 249,
-        },
-        {
-          x: 1680307200000,
-          y: 87,
-        },
-        {
-          x: 1682899200000,
-          y: 471,
-        },
-        {
-          x: 1685577600000,
-          y: 458,
-        },
-        {
-          x: 1688169600000,
-          y: 210,
-        },
-      ],
-    },
-    {
-      type: 'line',
-      marker: {
-        enabled: false,
-      },
-      name: 'Item 3',
-      data: [
-        {
-          x: 1672531200000,
-          y: 86,
-        },
-        {
-          x: 1675209600000,
-          y: 682,
-        },
-        {
-          x: 1677628800000,
-          y: 653,
-        },
-        {
-          x: 1680307200000,
-          y: 390,
-        },
-        {
-          x: 1682899200000,
-          y: 22,
-        },
-        {
-          x: 1685577600000,
-          y: 244,
-        },
-        {
-          x: 1688169600000,
-          y: 389,
-        },
-      ],
-    },
-    {
-      type: 'line',
-      marker: {
-        enabled: false,
-      },
-      name: 'Item 4',
-      data: [
-        {
-          x: 1672531200000,
-          y: 103,
-        },
-        {
-          x: 1675209600000,
-          y: 334,
-        },
-        {
-          x: 1677628800000,
-          y: 270,
-        },
-        {
-          x: 1680307200000,
-          y: 244,
-        },
-        {
-          x: 1682899200000,
-          y: 84,
-        },
-        {
-          x: 1685577600000,
-          y: 45,
-        },
-        {
-          x: 1688169600000,
-          y: 652,
-        },
-      ],
-    },
-    {
-      type: 'line',
-      marker: {
-        enabled: false,
-      },
-      name: 'Item 5',
-      data: [
-        {
-          x: 1672531200000,
-          y: 548,
-        },
-        {
-          x: 1675209600000,
-          y: 337,
-        },
-        {
-          x: 1677628800000,
-          y: 442,
-        },
-        {
-          x: 1680307200000,
-          y: 272,
-        },
-        {
-          x: 1682899200000,
-          y: 681,
-        },
-        {
-          x: 1685577600000,
-          y: 104,
-        },
-        {
-          x: 1688169600000,
-          y: 227,
-        },
-      ],
-    },
-    {
-      type: 'line',
-      marker: {
-        enabled: false,
-      },
-      name: 'Item 6',
-      data: [
-        {
-          x: 1672531200000,
-          y: 332,
-        },
-        {
-          x: 1675209600000,
-          y: 228,
-        },
-        {
-          x: 1677628800000,
-          y: 482,
-        },
-        {
-          x: 1680307200000,
-          y: 19,
-        },
-        {
-          x: 1682899200000,
-          y: 396,
-        },
-        {
-          x: 1685577600000,
-          y: 544,
-        },
-        {
-          x: 1688169600000,
-          y: 121,
-        },
-      ],
-    },
-    {
-      type: 'line',
-      marker: {
-        enabled: false,
-      },
-      name: 'Item 7',
-      data: [
-        {
-          x: 1672531200000,
-          y: 119,
-        },
-        {
-          x: 1675209600000,
-          y: 85,
-        },
-        {
-          x: 1677628800000,
-          y: 662,
-        },
-        {
-          x: 1680307200000,
-          y: 84,
-        },
-        {
-          x: 1682899200000,
-          y: 505,
-        },
-        {
-          x: 1685577600000,
-          y: 260,
-        },
-        {
-          x: 1688169600000,
-          y: 217,
-        },
-      ],
-    },
-  ],
-  xAxis: {
-    tickPixelInterval: 60,
-    type: 'datetime',
-    labels: {
-      format: '{value:%Y-%m}',
-    },
-  },
-  yAxis: {
-    title: {
-      text: '',
-    },
-    tickPixelInterval: 50,
-  },
-}
+import { useMemo } from 'react'
+import { Card, Empty, Spin } from '@tinkerbells/xenon-ui'
+import { ChartTooltip, ChartTooltipContent, ChartTooltipItem, LineChart } from '@tinkerbells/xenon-charts'
+
+import { useFilter } from '@/context/filter-context'
+import { formatRub } from '@/shared/lib/utils/format-rub'
+import { aggregateLicenseDataByVendor } from '@/utils/chart-utils'
 
 export function DetailChart() {
+  const {
+    licensesData,
+    loading,
+    error,
+    selectedVendor,
+    selectedCompany,
+    dateRange,
+  } = useFilter()
+
+  // Обработка данных для графика
+  const chartData = useMemo(() => {
+    if (!licensesData.length || loading)
+      return []
+
+    // Если нет выбранных вендоров, возвращаем пустой массив
+    if (!selectedVendor || selectedVendor.length === 0) {
+      return []
+    }
+
+    // Агрегируем данные по каждому вендору
+    return selectedVendor.map((vendor) => {
+      const vendorData = aggregateLicenseDataByVendor(
+        licensesData,
+        vendor,
+        selectedCompany,
+        dateRange[0],
+        dateRange[1],
+      )
+
+      return {
+        name: vendor,
+        data: vendorData.map(item => ({
+          x: new Date(item.date).getTime(),
+          y: item.value / 1000, // Преобразуем в тысячи рублей
+        })),
+      }
+    }).filter(series => series.data.length > 0) // Убираем пустые серии
+  }, [licensesData, selectedVendor, selectedCompany, dateRange, loading])
+
+  // Определяем максимальное значение для всех серий для настройки оси Y
+  const maxValue = useMemo(() => {
+    if (!chartData.length)
+      return 1000
+
+    return Math.max(
+      ...chartData.flatMap(series =>
+        series.data.map(point => point.y),
+      ),
+    ) * 1.1 // Добавляем 10% сверху для лучшего отображения
+  }, [chartData])
+
+  // Конфигурация графика
+  const chartOptions: Highcharts.Options = useMemo(() => {
+    return {
+      chart: {
+        type: 'line',
+        height: `${(226 / 701) * 100}%`,
+      },
+      title: false,
+      subtitle: false,
+      series: chartData.map(series => ({
+        type: 'line',
+        name: series.name,
+        data: series.data,
+        marker: {
+          enabled: true,
+          radius: 3,
+        },
+        tooltip: {
+          valueDecimals: 0,
+          valuePrefix: '',
+          valueSuffix: ' т.р.',
+        },
+      })),
+      xAxis: {
+        type: 'datetime',
+        labels: {
+          format: '{value:%d.%m.%Y}',
+        },
+        crosshair: true,
+      },
+      yAxis: {
+        title: false,
+        max: maxValue,
+        tickPixelInterval: 40,
+      },
+      tooltip: {
+        headerFormat: '<b>{point.x:%d.%m.%Y}</b><br/>',
+        pointFormat: '{series.name}: {point.y:,.0f} т.р.',
+        shared: true,
+      },
+      credits: {
+        enabled: false,
+      },
+      plotOptions: {
+        series: {
+          animation: {
+            duration: 500,
+          },
+          lineWidth: 2,
+          states: {
+            hover: {
+              lineWidth: 3,
+            },
+          },
+        },
+      },
+    }
+  }, [chartData, maxValue])
+
+  // Отображение в зависимости от состояния
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div className="chart-loading-container">
+          <Spin tip="Загрузка данных..." />
+        </div>
+      )
+    }
+
+    if (error) {
+      return (
+        <Empty
+          description={`Ошибка загрузки данных: ${error}`}
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
+      )
+    }
+
+    if (!chartData.length) {
+      return (
+        <Empty
+          description="Выберите вендор для отображения данных"
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
+      )
+    }
+
+    return (
+      <LineChart
+        tooltip={chart => (
+          <ChartTooltip chart={chart}>
+            <ChartTooltipContent>
+              {ctx => (
+                <>
+                  <ChartTooltipItem>
+                    {ctx.series.name}
+                    :
+                    {' '}
+                    <b>{Math.floor(Number(ctx.y))}</b>
+                  </ChartTooltipItem>
+                </>
+              )}
+            </ChartTooltipContent>
+          </ChartTooltip>
+        )}
+        options={chartOptions}
+      />
+    )
+  }
+
+  // Статистика по выбранным вендорам
+  const renderStats = () => {
+    if (!chartData.length || loading)
+      return null
+
+    const totalSum = chartData.reduce((sum, series) =>
+      sum + series.data.reduce((seriesSum, point) => seriesSum + point.y, 0), 0)
+
+    return (
+      <div className="chart-statistics">
+        <div className="stat-item">
+          <span className="stat-label">Выбрано вендоров:</span>
+          <span className="stat-value">{chartData.length}</span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-label">Общая сумма:</span>
+          <span className="stat-value">{formatRub(totalSum * 1000)}</span>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <Card title="Детализация, т.р." className="detail-chart" size="small">
-      <LineChart options={lineChartBaseOptions} />
+    <Card
+      title={`Детализация по вендорам${selectedCompany ? ` (${selectedCompany})` : ''}, т.р.`}
+      className="detail-chart"
+      size="small"
+    >
+      <div className="chart-container">
+        {renderContent()}
+      </div>
+      {renderStats()}
     </Card>
   )
 }

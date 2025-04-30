@@ -4,3 +4,54 @@
   margin-right: 16px;
   margin-bottom: 16px;
 }
+
+.chart-container {
+  height: calc(100% - 40px);
+  position: relative;
+}
+
+.chart-loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.chart-statistics {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 16px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-label {
+  color: var(--xenon-color-text-secondary);
+  font-size: var(--xenon-font-sizesm);
+}
+
+.stat-value {
+  color: var(--xenon-color-text);
+  font-weight: 600;
+  font-size: var(--xenon-font-size);
+}
+
+@media (max-width: 768px) {
+  .detail-chart {
+    width: 90vw;
+    margin-left: 16px;
+  }
+
+  .chart-statistics {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

@@ -32,17 +32,16 @@ export function Panel() {
     value: vendor,
   }))
 
-  // Добавляем опцию "Все" для обоих селекторов
+  // Добавляем опцию "Все" для компаний
   companyOptions.unshift({ label: 'Все компании', value: '' })
-  vendorOptions.unshift({ label: 'Все вендоры', value: '' })
 
   // Обработчики изменений
   const handleCompanyChange = (value: string) => {
     setSelectedCompany(value || null)
   }
 
-  const handleVendorChange = (value: string) => {
-    setSelectedVendor(value || null)
+  const handleVendorChange = (values: string[]) => {
+    setSelectedVendor(values.length > 0 ? values : null)
   }
 
   // const handleDateRangeChange = (dates: [Date, Date] | null) => {
@@ -66,19 +65,19 @@ export function Panel() {
         value={selectedCompany || ''}
         allowClear
         showSearch
-        labelRender={() => <Typography>Заказчик</Typography>}
       />
 
       <Select
+        mode="multiple"
         loading={loading}
         style={{ minWidth: 200 }}
-        placeholder="Выберите вендора"
+        maxTagCount={3}
+        placeholder="Выберите вендор"
         options={vendorOptions}
         onChange={handleVendorChange}
-        value={selectedVendor || ''}
+        value={selectedVendor || []}
         allowClear
         showSearch
-        labelRender={() => <Typography>Вендор</Typography>}
       />
 
       {loading && <Spin size="small" />}

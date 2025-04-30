@@ -67,6 +67,64 @@ export function aggregateLicenseDataByDate(
 }
 
 /**
+ * Агрегирует данные лицензий по вендору и датам
+ *
+ * @param data Исходные данные лицензий
+ * @param vendorCode Код вендора для фильтрации
+ * @param companyName Название компании для фильтрации (если null, то все компании)
+ * @param startDate Начальная дата диапазона (если null, то без ограничения)
+ * @param endDate Конечная дата диапазона (если null, то без ограничения)
+ * @returns Массив объектов с датами и значениями для графика
+ */
+export function aggregateLicenseDataByVendor(
+  data: LicensesApiData,
+  vendorCode: string,
+  companyName: string | null = null,
+  startDate: Date | null = null,
+  endDate: Date | null = null,
+): TimeSeriesData[] {
+  // Фильтрация по компании
+  let filteredData = companyName
+    ? data.filter(license => license.customer === companyName)
+    : data
+
+  // Фильтрация по вендору
+  filteredData = filteredData.filter(license => license.articleCode === vendorCode)
+
+  // Фильтрация по диапазону дат
+  if (startDate || endDate) {
+    filteredData = filteredData.filter((license) => {
+      const licenseDate = new Date(license.expirationDate)
+
+      const afterStart = startDate ? licenseDate >= startDate : true
+      const beforeEnd = endDate ? licenseDate <= endDate : true
+
+      return afterStart && beforeEnd
+    })
+  }
+
+  // Группировка по датам и суммирование стоимости
+  const groupedData: Record<string, number> = {}
+
+  filteredData.forEach((license) => {
+    const dateKey = license.expirationDate
+
+    if (!groupedData[dateKey]) {
+      groupedData[dateKey] = 0
+    }
+
+    groupedData[dateKey] += license.totalPrice
+  })
+
+  // Преобразование в массив и сортировка по дате
+  const result = Object.entries(groupedData)
+    .map(([date, value]) => ({ date, value }))
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+
+  return result
+}
+
+/**
  * Форматирует даты для отображения на графике
  *
  * @param dateStr ISO строка даты

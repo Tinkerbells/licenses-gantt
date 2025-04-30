@@ -1,8 +1,8 @@
 import './aggregation-chart.styles.css'
 
 import { useEffect, useMemo, useState } from 'react'
-import { LineChart } from '@tinkerbells/xenon-charts'
 import { Card, Empty, Spin } from '@tinkerbells/xenon-ui'
+import { ChartTooltip, ChartTooltipContent, ChartTooltipItem, LineChart } from '@tinkerbells/xenon-charts'
 
 import { useFilter } from '@/context/filter-context'
 import { formatRub } from '@/shared/lib/utils/format-rub'
@@ -68,13 +68,11 @@ export function AggregationChart() {
         crosshair: true,
       },
       yAxis: {
-        title: {
-          text: 'Сумма, т.р.',
-        },
+        title: false,
         tickPixelInterval: 40,
         labels: {
           formatter() {
-            return 1
+            return this.value.toLocaleString('ru-RU')
           },
         },
       },
@@ -138,7 +136,27 @@ export function AggregationChart() {
       )
     }
 
-    return <LineChart options={chartOptions} />
+    return (
+      <LineChart
+        tooltip={chart => (
+          <ChartTooltip chart={chart}>
+            <ChartTooltipContent>
+              {ctx => (
+                <>
+                  <ChartTooltipItem>
+                    {ctx.series.name}
+                    :
+                    {' '}
+                    <b>{Math.floor(Number(ctx.y))}</b>
+                  </ChartTooltipItem>
+                </>
+              )}
+            </ChartTooltipContent>
+          </ChartTooltip>
+        )}
+        options={chartOptions}
+      />
+    )
   }
 
   // Рендерим статистику под графиком, если есть данные
