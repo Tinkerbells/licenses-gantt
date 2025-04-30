@@ -166,7 +166,7 @@ export function DetailChart() {
     return (
       <LineChart
         tooltip={chart => (
-          <ChartTooltip offsetY={-50} chart={chart}>
+          <ChartTooltip offsetY={-50} offsetX={25} chart={chart}>
             <ChartTooltipContent>
               {(ctx) => {
                 // Вывод контекста в консоль при необходимости

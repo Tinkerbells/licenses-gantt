@@ -121,10 +121,13 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
       ? licensesData.filter(license => license.customer === selectedCompany)
       : licensesData
 
-    // Фильтруем по вендору, если указан (только первый вендор для агрегационного графика)
-    const vendorFilteredData = selectedVendor && selectedVendor.length > 0
-      ? filteredData.filter(license => license.articleCode === selectedVendor[0])
-      : filteredData
+    // Убираем фильтрацию по вендору для агрегационного графика
+    // const vendorFilteredData = selectedVendor && selectedVendor.length > 0
+    //   ? filteredData.filter(license => license.articleCode === selectedVendor[0])
+    //   : filteredData
+
+    // Используем данные, отфильтрованные только по компании
+    const vendorFilteredData = filteredData
 
     // Фильтруем по диапазону дат, если указан
     const dateFilteredData = vendorFilteredData.filter((license) => {

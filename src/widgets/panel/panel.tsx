@@ -2,7 +2,7 @@ import './panel.styles.css'
 
 import type { SelectProps } from '@tinkerbells/xenon-ui'
 
-import { DatePicker, Flex, Select, Spin, Typography } from '@tinkerbells/xenon-ui'
+import { DatePicker, Flex, Select, Spin } from '@tinkerbells/xenon-ui'
 
 import { useFilter } from '@/context/filter-context'
 
