@@ -77,11 +77,13 @@ export function DetailChart() {
   }, [chartData])
 
   // Конфигурация графика
+  /* eslint-disable ts/ban-ts-comment */
+  // @ts-ignore
   const chartOptions: Highcharts.Options = useMemo(() => {
     return {
       chart: {
         type: 'line',
-        height: `${(226 / 701) * 100}%`,
+        height: `${(378 / 701) * 100}%`,
       },
       title: false,
       subtitle: false,

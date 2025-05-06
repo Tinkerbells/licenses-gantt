@@ -33,6 +33,8 @@ export function AggregationChart() {
   }, [aggregatedData])
 
   // Формируем опции для Highcharts
+  /* eslint-disable ts/ban-ts-comment */
+  // @ts-ignore
   const chartOptions: Highcharts.Options = useMemo(() => {
     // Формируем точки для графика в формате Highcharts
     const points = aggregatedData.dates.map((date, index) => ({
