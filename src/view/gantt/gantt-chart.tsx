@@ -1,3 +1,13 @@
+/**
+ * Файл: gantt-chart-filterable.tsx
+ * Путь: src/view/gantt/gantt-chart-filterable.tsx
+ *
+ * Описание: Компонент диаграммы Ганта с поддержкой фильтрации по компании и вендору
+ *
+ * Автор: Claude AI
+ * Дата создания: 07.05.2025
+ */
+
 import * as d3 from 'd3'
 import { useEffect, useRef, useState } from 'react'
 
@@ -5,8 +15,8 @@ import './gantt-chart.styles.css'
 
 import type { DateGranularityType, ExtendedLicense } from '@/types/license.types'
 
+import { useFilter } from '@/context/filter-context'
 import { formatRub } from '@/shared/lib/utils/format-rub'
-import { LicenseService } from '@/services/license-service'
 import {
   determineDateGranularity,
   formatDateByGranularity,
@@ -30,6 +40,16 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
   const containerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<HTMLDivElement>(null)
   const zoomTransformRef = useRef<d3.ZoomTransform | null>(null)
+
+  // Получаем доступ к контексту фильтра
+  const {
+    licensesData,
+    loading: contextLoading,
+    error: contextError,
+    selectedCompany,
+    selectedVendor,
+    dateRange,
+  } = useFilter()
 
   // Состояния компонента
   const [data, setData] = useState<ExtendedLicense[]>([])
@@ -62,28 +82,60 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     dotRadius: 5, // Радиус точек при масштабировании
   }
 
-  // Загрузка данных при монтировании компонента
+  // Применение фильтров к данным лицензий
   useEffect(() => {
-    const fetchData = async () => {
+    if (contextLoading) {
       setLoading(true)
-      setError(null)
-
-      try {
-        const response = await LicenseService.getLicensesData()
-        const preparedData = prepareLicenseData(response)
-        setData(preparedData)
-      }
-      catch (error) {
-        console.error('Ошибка при загрузке данных:', error)
-        setError('Не удалось загрузить данные лицензий. Пожалуйста, попробуйте позже.')
-      }
-      finally {
-        setLoading(false)
-      }
+      return
     }
 
-    fetchData()
-  }, [])
+    if (contextError) {
+      setError(contextError)
+      setLoading(false)
+      return
+    }
+
+    setLoading(true)
+
+    try {
+      // Используем данные из контекста и применяем фильтры
+      let filteredData = [...licensesData]
+
+      // Фильтрация по компании
+      if (selectedCompany) {
+        filteredData = filteredData.filter(license => license.customer === selectedCompany)
+      }
+
+      // Фильтрация по вендору (артикулу)
+      if (selectedVendor && selectedVendor.length > 0) {
+        filteredData = filteredData.filter(license =>
+          selectedVendor.includes(license.articleCode),
+        )
+      }
+
+      // Фильтрация по диапазону дат
+      if (dateRange[0] || dateRange[1]) {
+        filteredData = filteredData.filter((license) => {
+          const licenseDate = new Date(license.expirationDate)
+          const startFilter = dateRange[0] ? licenseDate >= dateRange[0] : true
+          const endFilter = dateRange[1] ? licenseDate <= dateRange[1] : true
+          return startFilter && endFilter
+        })
+      }
+
+      // Преобразуем данные в формат для диаграммы Ганта
+      const preparedData = prepareLicenseData(filteredData)
+      setData(preparedData)
+      setError(null)
+    }
+    catch (err) {
+      console.error('Ошибка при подготовке данных для диаграммы:', err)
+      setError('Не удалось обработать данные для диаграммы Ганта')
+    }
+    finally {
+      setLoading(false)
+    }
+  }, [licensesData, selectedCompany, selectedVendor, dateRange, contextLoading, contextError])
 
   // Обновление размеров при изменении окна
   useEffect(() => {
@@ -519,23 +571,6 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
           d3.select(this).style('fill-opacity', 1)
           setTooltipInfo(prev => ({ ...prev, visible: false }))
         })
-
-      // fullViewGroup.append('rect')
-      //   .attr('x', x - width + 10) // Сдвигаем от левого края
-      //   .attr('width', 100)
-      //   .attr('height', 20)
-      //   .attr('rx', 12)
-      //   .attr('ry', 12)
-      //   .attr('class', 'status-indicator')
-      //   .style('fill', 'var(--xenon-color-bg-container)')
-      //   .style('stroke', getStrokeColor(license.status))
-      //
-      // fullViewGroup.append('text')
-      //   .attr('x', x - width + 10) // Сдвигаем от левого края
-      //   .attr('class', 'status-indicator-text')
-      //   .style('font-size', '12px')
-      //   .style('fill', getStrokeColor(license.status))
-      //   .text(license.status === 'renewal' ? 'Заканчивается' : (license.status === 'expired' ? 'Просрочена' : 'Активна'))
 
       // Добавляем статус лицензии
       fullViewGroup.append('text')
@@ -1200,6 +1235,16 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
         <button onClick={() => window.location.reload()}>
           Повторить
         </button>
+      </div>
+    )
+  }
+
+  // Отображение сообщения, если нет данных для отображения после фильтрации
+  if (!data.length) {
+    return (
+      <div className="gantt-error">
+        <h3>Нет данных для отображения</h3>
+        <p>Измените параметры фильтрации для отображения данных на диаграмме.</p>
       </div>
     )
   }

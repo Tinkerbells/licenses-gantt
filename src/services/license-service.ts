@@ -1,3 +1,10 @@
+/**
+ * Файл: license-service.ts
+ * Путь: src/services/license-service.ts
+ *
+ * Описание: Сервис для работы с данными лицензий без группировки
+ */
+
 import { env } from '@/shared/env'
 
 import type { ExtendedLicense, LicensesApiData } from '../types/license.types'
@@ -46,78 +53,32 @@ export class LicenseService {
   }
 
   /**
-   * Преобразование данных API в формат для диаграммы Ганта с группировкой по компаниям и датам
+   * Преобразование данных API в формат для диаграммы Ганта без группировки
    * @param data Данные от API
    * @returns Массив расширенных данных лицензий для визуализации
    */
   static prepareGanttData(data: LicensesApiData): ExtendedLicense[] {
-    // Группировка по customer и expirationDate
-    const groupedData: Record<string, Record<string, LicensesApiData>> = {}
+    // Преобразуем каждый элемент LicenseData в ExtendedLicense без группировки
+    const extendedLicenses = data.map((license) => {
+      // Создаем уникальный ID для элемента
+      const safeCustomer = license.customer.replace(/[\s"']/g, '-')
+      const id = `lic-${license.id}-${safeCustomer}`
 
-    // Заполняем структуру группировки
-    data.forEach((license) => {
-      // Создаем ключ customer, если его еще нет
-      if (!groupedData[license.customer]) {
-        groupedData[license.customer] = {}
-      }
-
-      // Создаем ключ expirationDate для данного customer, если его еще нет
-      if (!groupedData[license.customer][license.expirationDate]) {
-        groupedData[license.customer][license.expirationDate] = []
-      }
-
-      // Добавляем лицензию в соответствующую группу
-      groupedData[license.customer][license.expirationDate].push(license)
-    })
-
-    const extendedLicenses: ExtendedLicense[] = []
-
-    // Формируем результат на основе группировки
-    Object.entries(groupedData).forEach(([customer, dateLicenses]) => {
-      Object.entries(dateLicenses).forEach(([date, licenses]) => {
-        // Агрегированные значения
-        const totalQuantity = licenses.reduce((sum, lic) => sum + lic.quantity, 0)
-        const totalPrice = licenses.reduce((sum, lic) => sum + lic.totalPrice, 0)
-
-        // Получаем уникальные articleCode
-        const uniqueArticleCodes = Array.from(new Set(licenses.map(lic => lic.articleCode)))
-
-        // Формируем заголовок
-        const title = uniqueArticleCodes.length > 1
-          ? `${uniqueArticleCodes[0]} (+${uniqueArticleCodes.length - 1})`
-          : uniqueArticleCodes[0]
-
-        // Объединяем все articleCode в одну строку для детального просмотра
-        const articleCode = uniqueArticleCodes.join(', ')
-
-        // Берем первое непустое имя продукта либо undefined
-        const productName = licenses.find(lic => lic.licenseName)?.licenseName || undefined
-
-        // Берем первый непустой срок либо undefined
-        const term = licenses.find(lic => lic.term)?.term || undefined
-
-        const endDate = new Date(date)
-
-        // Создаем уникальный ID для группы, заменяя специальные символы для безопасности
-        const safeCustomer = customer.replace(/[\s"']/g, '-')
-        const id = `lic-group-${safeCustomer}-${date}`
-
-        extendedLicenses.push({
-          id,
-          title,
-          company: customer,
-          date,
-          amount: totalQuantity,
-          endDate,
-          position: 0, // Будет рассчитано в calculateVisualizationParams
-          status: 'active', // Будет обновлено в calculateVisualizationParams
-          articleCode,
-          productName,
-          term,
-          unitPrice: totalPrice / totalQuantity,
-          totalPrice,
-        })
-      })
+      return {
+        id,
+        title: license.articleCode,
+        company: license.customer,
+        date: license.expirationDate,
+        amount: license.quantity,
+        endDate: new Date(license.expirationDate),
+        position: 0, // Будет рассчитано в calculateVisualizationParams
+        status: 'active', // Будет обновлено в calculateVisualizationParams
+        articleCode: license.articleCode,
+        productName: license.licenseName || undefined,
+        term: license.term || undefined,
+        unitPrice: license.unitPrice,
+        totalPrice: license.totalPrice,
+      } as ExtendedLicense
     })
 
     return this.calculateVisualizationParams(extendedLicenses)

@@ -1,7 +1,19 @@
+/**
+ * Файл: panel.tsx
+ * Путь: src/widgets/panel/panel.tsx
+ *
+ * Описание: Компонент панели фильтров для диаграммы Ганта
+ *
+ * Автор: Claude AI
+ * Дата обновления: 07.05.2025
+ */
+
 import './panel.styles.css'
 
-import type { SelectProps } from '@tinkerbells/xenon-ui'
+import type { Dayjs } from 'dayjs'
+import type { RangePickerProps, SelectProps } from '@tinkerbells/xenon-ui'
 
+import dayjs from 'dayjs'
 import { DatePicker, Flex, Select, Spin } from '@tinkerbells/xenon-ui'
 
 import { useFilter } from '@/context/filter-context'
@@ -13,15 +25,15 @@ export function Panel() {
     setSelectedCompany,
     selectedVendor,
     setSelectedVendor,
+    dateRange,
+    setDateRange,
     getCompanyList,
     getVendorList,
   } = useFilter()
 
-  // Получаем списки для выпадающих меню
   const companies = getCompanyList()
   const vendors = getVendorList()
 
-  // Формирование опций для выпадающих списков
   const companyOptions: SelectProps['options'] = companies.map(company => ({
     label: company,
     value: company,
@@ -32,10 +44,8 @@ export function Panel() {
     value: vendor,
   }))
 
-  // Добавляем опцию "Все" для компаний
   companyOptions.unshift({ label: 'Все компании', value: '' })
 
-  // Обработчики изменений
   const handleCompanyChange = (value: string) => {
     setSelectedCompany(value || null)
   }
@@ -44,15 +54,29 @@ export function Panel() {
     setSelectedVendor(values.length > 0 ? values : null)
   }
 
-  // const handleDateRangeChange = (dates: [Date, Date] | null) => {
-  //   setDateRange(dates || [null, null])
-  // }
+  const handleDateRangeChange: RangePickerProps['onChange'] = (dates) => {
+    if (!dates || !dates[0] || !dates[1]) {
+      setDateRange([null, null])
+      return
+    }
+
+    // Преобразуем Dayjs в JavaScript Date
+    const startDate = dates[0].toDate()
+    const endDate = dates[1].toDate()
+
+    setDateRange([startDate, endDate])
+  }
+
+  const dayjsValue: [Dayjs | null, Dayjs | null] | null
+    = dateRange[0] && dateRange[1]
+      ? [dayjs(dateRange[0]), dayjs(dateRange[1])]
+      : null
 
   return (
     <Flex className="panel" wrap="wrap" gap="middle" align="center">
       <DatePicker.RangePicker
-        // onChange={handleDateRangeChange}
-        // value={dateRange[0] && dateRange[1] ? [dateRange[0], dateRange[1]] : null}
+        onChange={handleDateRangeChange}
+        value={dayjsValue}
         placeholder={['Начальная дата', 'Конечная дата']}
       />
 
