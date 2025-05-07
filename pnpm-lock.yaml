@@ -15,8 +15,8 @@ importers:
         specifier: ^1.6.0
         version: 1.6.0
       '@tinkerbells/xenon-charts':
-        specifier: ^0.0.8
-        version: 0.0.8(@vue/compiler-sfc@3.5.13)(highcharts-react-official@3.2.2(highcharts@12.2.0)(react@18.3.1))(highcharts@12.2.0)(prettier@3.5.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@4.40.0)(typescript@5.7.3)(yaml@2.7.1)
+        specifier: ^0.0.9
+        version: 0.0.9(@vue/compiler-sfc@3.5.13)(highcharts-react-official@3.2.2(highcharts@12.2.0)(react@18.3.1))(highcharts@12.2.0)(prettier@3.5.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@4.40.0)(typescript@5.7.3)(yaml@2.7.1)
       '@tinkerbells/xenon-ui':
         specifier: ^0.0.77
         version: 0.0.77(@types/react-dom@18.3.6(@types/react@18.3.20))(@types/react@18.3.20)(@vue/compiler-sfc@3.5.13)(antd@5.24.7(date-fns@4.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(prettier@3.5.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1049,8 +1049,8 @@ packages:
     resolution: {integrity: sha512-ldZXEhOBb8Is7xLs01fR3YEc3DERiz5silj8tnGkFZytt1abEvl/GhUmCE0PMLaMPTa3Jk4HbKmRlHmu+gCftg==}
     engines: {node: '>=12'}
 
-  '@tinkerbells/xenon-charts@0.0.8':
-    resolution: {integrity: sha512-PDE0WBINUecmeEXg57qdn4ORuL21JWMKLlphO66O5YzqTG43bUOLt4sldVyEf+4W4QBaHY6J0JpMOlfOuWvWDw==, tarball: https://npm.pkg.github.com/download/@tinkerbells/xenon-charts/0.0.8/05805fe960f258cb818e8e7ed9164288a1b04745}
+  '@tinkerbells/xenon-charts@0.0.9':
+    resolution: {integrity: sha512-q4REeSN7orQ1usLiNNZePuTtQUEM19JLC2XVmlA36NzpbxoHl1ddQiNx7nheCkr3S3mZeIyiM3KfE2PMA4AAeg==, tarball: https://npm.pkg.github.com/download/@tinkerbells/xenon-charts/0.0.9/196f96ee57f5baf0ff779c596b38c0c1648cd03a}
     engines: {node: '>=18.0.0', npm: '>=7.0.0'}
     peerDependencies:
       highcharts: ^12.1.2
@@ -4397,7 +4397,7 @@ snapshots:
 
   '@tanstack/table-core@8.21.3': {}
 
-  '@tinkerbells/xenon-charts@0.0.8(@vue/compiler-sfc@3.5.13)(highcharts-react-official@3.2.2(highcharts@12.2.0)(react@18.3.1))(highcharts@12.2.0)(prettier@3.5.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@4.40.0)(typescript@5.7.3)(yaml@2.7.1)':
+  '@tinkerbells/xenon-charts@0.0.9(@vue/compiler-sfc@3.5.13)(highcharts-react-official@3.2.2(highcharts@12.2.0)(react@18.3.1))(highcharts@12.2.0)(prettier@3.5.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@4.40.0)(typescript@5.7.3)(yaml@2.7.1)':
     dependencies:
       '@bem-react/classname': 1.6.0
       '@faker-js/faker': 9.7.0

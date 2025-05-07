@@ -16,6 +16,7 @@ import './gantt-chart.styles.css'
 import type { DateGranularityType, ExtendedLicense } from '@/types/license.types'
 
 import { useFilter } from '@/context/filter-context'
+import { truncateCompanyName } from '@/utils/truncate'
 import { formatRub } from '@/shared/lib/utils/format-rub'
 import {
   determineDateGranularity,
@@ -578,7 +579,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
         .attr('class', 'status-label xenon-typography')
         .style('font-size', '14px')
         .style('pointer-events', 'none')
-        .text(license.company)
+        .text(truncateCompanyName(license.company)) // Используем функцию truncateCompanyName
 
       // Добавляем название лицензии
       fullViewGroup.append('text')
@@ -799,6 +800,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
 
           fullView.select('.status-label')
             .attr('x', x - scaledWidth + 10)
+            .text(truncateCompanyName(license.company))
 
           fullView.select('.status-indicator')
             .attr('x', x - scaledWidth + 10)
@@ -1109,6 +1111,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
             .attr('x', x - scaledWidth + 10)
             .attr('y', yPos - barHeight / 2 + 15)
             .style('font-size', `${calculateFontSize(14, transform.k)}px`)
+            .text(truncateCompanyName(license.company))
 
           fullView.select('.status-indicator')
             .attr('x', x - 115)
