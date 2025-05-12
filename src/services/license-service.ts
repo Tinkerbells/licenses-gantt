@@ -48,7 +48,12 @@ export class LicenseService {
 
     console.log(`Загрузка данных из: ${dataFile} для страницы ${dataSource}`)
 
-    const response = await fetch(`${env.BASE_URL}/${dataFile}`)
+    const response = await fetch(`${env.BASE_URL}/${dataFile}`, {
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Accept': 'application/json; charset=UTF-8',
+      },
+    })
     if (!response.ok) {
       throw new Error(`Не удалось загрузить локальные данные по адресу ${env.BASE_URL}/${dataFile}: ${response.status}`)
     }

@@ -12,7 +12,6 @@ export function AggregationChart() {
     loading,
     error,
     selectedCompany,
-    dateRange,
     getAggregationData,
   } = useFilter()
 
@@ -20,10 +19,9 @@ export function AggregationChart() {
   const [hasData, setHasData] = useState(false)
 
   // Получаем агрегированные данные для графика
-  // Обратите внимание: теперь мы также зависим от dateRange, но не от selectedVendor
+  // Важно: теперь функция getAggregationData игнорирует фильтр selectedVendor
   const aggregatedData = useMemo(() => getAggregationData(), [
     selectedCompany,
-    dateRange,
     getAggregationData,
   ])
 
@@ -45,7 +43,7 @@ export function AggregationChart() {
     return {
       chart: {
         type: 'line',
-        height: `${(226 / 701) * 100}%`,
+        height: '300px',
       },
       title: false,
       subtitle: false,
@@ -142,8 +140,6 @@ export function AggregationChart() {
           <ChartTooltip offsetY={-50} offsetX={25} chart={chart}>
             <ChartTooltipContent>
               {(ctx) => {
-                // Можно раскомментировать для отладки
-                // console.log('Aggregation tooltip context:', ctx);
                 return (
                   <ChartTooltipItem>
                     <b>{Math.floor(Number(ctx.y))}</b>

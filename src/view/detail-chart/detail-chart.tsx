@@ -9,76 +9,20 @@ import { formatRub } from '@/shared/lib/utils/format-rub'
 
 export function DetailChart() {
   const {
-    licensesData,
     loading,
     error,
     selectedVendor,
-    dateRange,
+    getDetailData,
   } = useFilter()
 
-  // Обработка данных для графика
+  // Используем новую функцию getDetailData вместо прямой обработки данных
   const chartData = useMemo(() => {
-    if (!licensesData.length || loading)
-      return []
-
-    // Если нет выбранных вендоров, возвращаем пустой массив
-    if (!selectedVendor || selectedVendor.length === 0) {
+    if (loading || !selectedVendor || selectedVendor.length === 0) {
       return []
     }
 
-    // Агрегируем данные по каждому вендору (независимо от компании)
-    return selectedVendor.map((vendor) => {
-      // Фильтруем данные только по вендору
-      const vendorData = licensesData.filter(license => license.vendor === vendor)
-
-      // Применяем фильтр по диапазону дат, если он установлен
-      const dateFilteredData = vendorData.filter((license) => {
-        // Используем унифицированный подход к парсингу дат для совместимости
-        const licenseDate = new Date(license.expirationDate)
-
-        // Проверяем, что дата корректно спарсилась
-        if (Number.isNaN(licenseDate.getTime())) {
-          return false
-        }
-
-        const startFilter = dateRange[0] ? licenseDate >= dateRange[0] : true
-        const endFilter = dateRange[1] ? licenseDate <= dateRange[1] : true
-        return startFilter && endFilter
-      })
-
-      // Группируем по датам и суммируем
-      const groupedByDate: Record<string, number> = {}
-      dateFilteredData.forEach((license) => {
-        const date = license.expirationDate
-        if (!groupedByDate[date]) {
-          groupedByDate[date] = 0
-        }
-        groupedByDate[date] += license.totalPrice
-      })
-
-      // Сортируем даты в хронологическом порядке
-      const sortedDates = Object.keys(groupedByDate).sort((a, b) => {
-        const dateA = new Date(a)
-        const dateB = new Date(b)
-        return dateA.getTime() - dateB.getTime()
-      })
-
-      // Формируем массив точек для графика
-      const points = sortedDates.map((date) => {
-        const jsDate = new Date(date)
-
-        return {
-          x: jsDate.getTime(),
-          y: groupedByDate[date], // Преобразуем в тысячи рублей
-        }
-      })
-
-      return {
-        name: vendor,
-        data: points,
-      }
-    }).filter(series => series.data.length > 0) // Убираем пустые серии
-  }, [licensesData, selectedVendor, dateRange, loading])
+    return getDetailData()
+  }, [getDetailData, selectedVendor, loading])
 
   // Определяем максимальное значение для всех серий для настройки оси Y
   const maxValue = useMemo(() => {
@@ -92,8 +36,6 @@ export function DetailChart() {
     ) * 1.1 // Добавляем 10% сверху для лучшего отображения
   }, [chartData])
 
-  console.log(chartData)
-
   // Конфигурация графика
   /* eslint-disable ts/ban-ts-comment */
   // @ts-ignore
@@ -101,7 +43,7 @@ export function DetailChart() {
     return {
       chart: {
         type: 'line',
-        height: `${(226 / 701) * 100}%`,
+        height: '300px',
       },
       title: false,
       subtitle: false,
