@@ -1,9 +1,12 @@
 import type { ReactNode } from 'react'
 
+import { useLocation } from 'react-router'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
+import type { DataSource } from '@/services/license-service'
 import type { LicensesApiData } from '@/types/license.types'
 
+import { root } from '@/shared/router'
 import { LicenseService } from '@/services/license-service'
 
 // Интерфейс для описания данных агрегации
@@ -19,6 +22,7 @@ interface FilterContextType {
   licensesData: LicensesApiData
   loading: boolean
   error: string | null
+  dataSource: DataSource
 
   // Фильтры
   selectedCompany: string | null
@@ -39,6 +43,7 @@ const FilterContext = createContext<FilterContextType>({
   licensesData: [],
   loading: true,
   error: null,
+  dataSource: 'home',
 
   selectedCompany: null,
   setSelectedCompany: () => {},
@@ -57,12 +62,24 @@ interface FilterProviderProps {
   children: ReactNode
 }
 
+// Функция для определения источника данных на основе пути
+function getDataSourceFromPath(pathname: string): DataSource {
+  if (pathname.includes(root.status.$path())) {
+    return 'status'
+  }
+  return 'home'
+}
+
 // Провайдер контекста
 export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
+  // Получаем текущий путь
+  const location = useLocation()
+
   // Состояния для данных
   const [licensesData, setLicensesData] = useState<LicensesApiData>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
+  const [dataSource, setDataSource] = useState<DataSource>(getDataSourceFromPath(location.pathname))
 
   // Состояния для фильтров
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null)
@@ -70,25 +87,38 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
   const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null])
 
   // Загрузка данных
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true)
-      setError(null)
+  const fetchData = async (source: DataSource) => {
+    setLoading(true)
+    setError(null)
 
-      try {
-        const data = await LicenseService.getLicensesData()
-        setLicensesData(data)
-      }
-      catch (err) {
-        setError('Ошибка при загрузке данных лицензий')
-        console.error('Ошибка при загрузке данных:', err)
-      }
-      finally {
-        setLoading(false)
-      }
+    try {
+      console.log(`Загрузка данных для источника: ${source}`)
+      const data = await LicenseService.getLicensesData(source)
+      setLicensesData(data)
     }
+    catch (err) {
+      setError('Ошибка при загрузке данных лицензий')
+      console.error('Ошибка при загрузке данных:', err)
+    }
+    finally {
+      setLoading(false)
+    }
+  }
 
-    fetchData()
+  // Обновляем источник данных при изменении маршрута
+  useEffect(() => {
+    const newDataSource = getDataSourceFromPath(location.pathname)
+
+    // Если источник данных изменился, обновляем его и загружаем новые данные
+    if (newDataSource !== dataSource) {
+      setDataSource(newDataSource)
+      fetchData(newDataSource)
+    }
+  }, [location.pathname])
+
+  // Начальная загрузка данных
+  useEffect(() => {
+    fetchData(dataSource)
   }, [])
 
   // Получение списка компаний из данных
@@ -177,6 +207,7 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
     licensesData,
     loading,
     error,
+    dataSource,
 
     selectedCompany,
     setSelectedCompany,

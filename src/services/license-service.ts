@@ -1,25 +1,24 @@
-/**
- * Файл: license-service.ts
- * Путь: src/services/license-service.ts
- *
- * Описание: Сервис для работы с данными лицензий без группировки
- */
-
 import { env } from '@/shared/env'
 
 import type { ExtendedLicense, LicensesApiData } from '../types/license.types'
 
-import { generateMockData } from './license-mock'
+// import { generateMockData } from './license-mock'
+
+/**
+ * Тип источника данных
+ */
+export type DataSource = 'home' | 'status'
 
 /**
  * Класс для работы с API лицензий
  */
 export class LicenseService {
   /**
-   * Получение данных лицензий
+   * Получение данных лицензий из выбранного источника
+   * @param dataSource Источник данных ('home' или 'status')
    * @returns Promise с данными лицензий
    */
-  static async getLicensesData(): Promise<LicensesApiData> {
+  static async getLicensesData(dataSource: DataSource = 'home'): Promise<LicensesApiData> {
     try {
       // В реальном проекте здесь мог бы быть fetch к API:
       //   const response = await fetch('/api/licenses')
@@ -30,7 +29,7 @@ export class LicenseService {
       // if (env.NODE_ENV === 'development') {
       //   return generateMockData(100)
       // }
-      return await this.getLocalData()
+      return await this.getLocalData(dataSource)
     }
     catch (error) {
       console.error('Ошибка при загрузке данных лицензий:', error)
@@ -40,12 +39,18 @@ export class LicenseService {
 
   /**
    * Получение локальных данных для тестирования
-   * @returns Данные лицензий из public/data.json
+   * @param dataSource Источник данных ('home' или 'status')
+   * @returns Данные лицензий из выбранного JSON файла
    */
-  private static async getLocalData(): Promise<LicensesApiData> {
-    const response = await fetch(`${env.BASE_URL}/data.json`)
+  private static async getLocalData(dataSource: DataSource): Promise<LicensesApiData> {
+    // Выбираем файл в зависимости от источника данных
+    const dataFile = dataSource === 'status' ? 'data-short.json' : 'data.json'
+
+    console.log(`Загрузка данных из: ${dataFile} для страницы ${dataSource}`)
+
+    const response = await fetch(`${env.BASE_URL}/${dataFile}`)
     if (!response.ok) {
-      throw new Error(`Не удалось загрузить локальные данные по адресу ${env.BASE_URL}/data.json: ${response.status}`)
+      throw new Error(`Не удалось загрузить локальные данные по адресу ${env.BASE_URL}/${dataFile}: ${response.status}`)
     }
     // небольшая искусственная задержка, если хотите имитировать загрузку
     await new Promise(r => setTimeout(r, 800))

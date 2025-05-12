@@ -1,17 +1,9 @@
-/**
- * Файл: gantt-chart-filterable.tsx
- * Путь: src/view/gantt/gantt-chart-filterable.tsx
- *
- * Описание: Компонент диаграммы Ганта с поддержкой фильтрации по компании и вендору
- *
- * Автор: Claude AI
- * Дата создания: 07.05.2025
- */
-
 import * as d3 from 'd3'
-import { useEffect, useRef, useState } from 'react'
+import { Spin } from '@tinkerbells/xenon-ui'
 
 import './gantt-chart.styles.css'
+
+import { useEffect, useRef, useState } from 'react'
 
 import type { DateGranularityType, ExtendedLicense } from '@/types/license.types'
 
@@ -1223,10 +1215,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
   // Рендер загрузки и ошибок
   if (loading) {
     return (
-      <div className="gantt-loading">
-        <div className="loading-spinner"></div>
-        <p>Загрузка данных лицензий...</p>
-      </div>
+      <Spin tip="Загрузка..." fullscreen />
     )
   }
 
