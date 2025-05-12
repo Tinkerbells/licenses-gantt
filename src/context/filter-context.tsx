@@ -30,7 +30,7 @@ interface FilterContextType {
 
   // Геттеры данных
   getCompanyList: () => string[]
-  getVendorList: () => string[]
+  getVendorList: () => { articleCode: string, licenseName: string }[]
   getAggregationData: () => AggregationData
 }
 
@@ -102,13 +102,25 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
   }
 
   // Получение списка вендоров/артикулов из данных
-  const getVendorList = (): string[] => {
+  const getVendorList = (): { articleCode: string, licenseName: string }[] => {
     if (!licensesData.length)
       return []
 
-    // Получаем уникальные артикулы (представляющие вендоров)
-    const vendors = Array.from(new Set(licensesData.map(license => license.articleCode)))
-    return vendors.sort()
+    // Создаем Map для хранения уникальных записей по articleCode
+    const vendorMap = new Map<string, { articleCode: string, licenseName: string }>()
+
+    licensesData.forEach((license) => {
+    // Если записи с таким articleCode еще нет - добавляем в Map
+      if (!vendorMap.has(license.articleCode)) {
+        vendorMap.set(license.articleCode, {
+          articleCode: license.articleCode,
+          licenseName: license.licenseName || license.articleCode, // Если licenseName пустой - используем articleCode
+        })
+      }
+    })
+
+    // Преобразуем Map в массив и сортируем по articleCode
+    return Array.from(vendorMap.values()).sort((a, b) => a.articleCode.localeCompare(b.articleCode))
   }
 
   // Получение данных для агрегационного графика

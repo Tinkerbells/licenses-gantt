@@ -40,8 +40,8 @@ export function Panel() {
   }))
 
   const vendorOptions: SelectProps['options'] = vendors.map(vendor => ({
-    label: vendor,
-    value: vendor,
+    label: vendor.licenseName || vendor.articleCode,
+    value: vendor.articleCode,
   }))
 
   companyOptions.unshift({ label: 'Все компании', value: '' })
