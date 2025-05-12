@@ -95,7 +95,7 @@ export function Panel() {
         mode="multiple"
         loading={loading}
         style={{ minWidth: 200, maxWidth: 800 }}
-        maxTagCount={3}
+        maxTagCount={1}
         placeholder="Выберите вендор"
         options={vendorOptions}
         onChange={handleVendorChange}
