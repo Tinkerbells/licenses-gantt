@@ -39,7 +39,7 @@ export function AggregationChart() {
     // Формируем точки для графика в формате Highcharts
     const points = aggregatedData.dates.map((date, index) => ({
       x: new Date(date).getTime(),
-      y: aggregatedData.prices[index] / 1000, // Переводим в тысячи рублей
+      y: aggregatedData.prices[index], // Переводим в тысячи рублей
     }))
 
     return {
@@ -80,11 +80,6 @@ export function AggregationChart() {
             return this.value.toLocaleString('ru-RU')
           },
         },
-      },
-      tooltip: {
-        headerFormat: '<b>{point.x:%d.%m.%Y}</b><br/>',
-        pointFormat: '{series.name}: {point.y:,.0f} т.р.',
-        shared: true,
       },
       credits: {
         enabled: false,
@@ -152,7 +147,6 @@ export function AggregationChart() {
                 return (
                   <ChartTooltipItem>
                     <b>{Math.floor(Number(ctx.y))}</b>
-                    {' '}
                     т.р.
                   </ChartTooltipItem>
                 )

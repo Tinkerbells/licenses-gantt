@@ -69,7 +69,7 @@ export function DetailChart() {
 
         return {
           x: jsDate.getTime(),
-          y: groupedByDate[date] / 1000, // Преобразуем в тысячи рублей
+          y: groupedByDate[date], // Преобразуем в тысячи рублей
         }
       })
 
@@ -92,6 +92,8 @@ export function DetailChart() {
     ) * 1.1 // Добавляем 10% сверху для лучшего отображения
   }, [chartData])
 
+  console.log(chartData)
+
   // Конфигурация графика
   /* eslint-disable ts/ban-ts-comment */
   // @ts-ignore
@@ -111,12 +113,12 @@ export function DetailChart() {
           enabled: true,
           radius: 3,
         },
-        tooltip: {
-          valueDecimals: 0,
-          valuePrefix: '',
-          valueSuffix: ' т.р.',
-        },
       })),
+      tooltip: {
+        valueDecimals: 3,
+        valuePrefix: '',
+        valueSuffix: '',
+      },
       xAxis: {
         type: 'datetime',
         labels: {
@@ -128,11 +130,6 @@ export function DetailChart() {
         title: false,
         max: maxValue,
         tickPixelInterval: 40,
-      },
-      tooltip: {
-        headerFormat: '<b>{point.x:%d.%m.%Y}</b><br/>',
-        pointFormat: '{series.name}: {point.y:,.0f} т.р.',
-        shared: true,
       },
       credits: {
         enabled: false,
@@ -191,8 +188,8 @@ export function DetailChart() {
                   <ChartTooltipItem>
                     {ctx.series.name}
                     :
+                    &nbsp;
                     <b>{Math.floor(Number(ctx.y))}</b>
-                    {' '}
                     т.р.
                   </ChartTooltipItem>
                 )
