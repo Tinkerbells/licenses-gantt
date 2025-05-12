@@ -28,24 +28,18 @@ export function DetailChart() {
 
     // Агрегируем данные по каждому вендору (независимо от компании)
     return selectedVendor.map((vendor) => {
-      // Фильтруем данные только по вендору (используем поле vendor вместо articleCode)
+      // Фильтруем данные только по вендору
       const vendorData = licensesData.filter(license => license.vendor === vendor)
 
       // Применяем фильтр по диапазону дат, если он установлен
       const dateFilteredData = vendorData.filter((license) => {
-        // Парсим дату из формата ДД.ММ.ГГГГ
-        const parts = license.expirationDate.split('.')
-        if (parts.length !== 3)
-          return false
+        // Используем унифицированный подход к парсингу дат для совместимости
+        const licenseDate = new Date(license.expirationDate)
 
-        const licenseDate = new Date(
-          Number.parseInt(parts[2], 10), // год
-          Number.parseInt(parts[1], 10) - 1, // месяц (0-11)
-          Number.parseInt(parts[0], 10), // день
-        )
-
-        if (Number.isNaN(licenseDate.getTime()))
+        // Проверяем, что дата корректно спарсилась
+        if (Number.isNaN(licenseDate.getTime())) {
           return false
+        }
 
         const startFilter = dateRange[0] ? licenseDate >= dateRange[0] : true
         const endFilter = dateRange[1] ? licenseDate <= dateRange[1] : true
@@ -64,26 +58,14 @@ export function DetailChart() {
 
       // Сортируем даты в хронологическом порядке
       const sortedDates = Object.keys(groupedByDate).sort((a, b) => {
-        const partsA = a.split('.').map(Number)
-        const partsB = b.split('.').map(Number)
-
-        // Сравниваем год, затем месяц, затем день
-        if (partsA[2] !== partsB[2])
-          return partsA[2] - partsB[2]
-        if (partsA[1] !== partsB[1])
-          return partsA[1] - partsB[1]
-        return partsA[0] - partsB[0]
+        const dateA = new Date(a)
+        const dateB = new Date(b)
+        return dateA.getTime() - dateB.getTime()
       })
 
       // Формируем массив точек для графика
       const points = sortedDates.map((date) => {
-        // Парсим дату для правильного отображения на графике
-        const parts = date.split('.')
-        const jsDate = new Date(
-          Number.parseInt(parts[2], 10),
-          Number.parseInt(parts[1], 10) - 1,
-          Number.parseInt(parts[0], 10),
-        )
+        const jsDate = new Date(date)
 
         return {
           x: jsDate.getTime(),
@@ -92,7 +74,7 @@ export function DetailChart() {
       })
 
       return {
-        name: vendor, // Используем имя вендора вместо articleCode
+        name: vendor,
         data: points,
       }
     }).filter(series => series.data.length > 0) // Убираем пустые серии
@@ -109,8 +91,6 @@ export function DetailChart() {
       ),
     ) * 1.1 // Добавляем 10% сверху для лучшего отображения
   }, [chartData])
-
-  console.log(chartData)
 
   // Конфигурация графика
   /* eslint-disable ts/ban-ts-comment */
