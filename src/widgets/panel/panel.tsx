@@ -94,7 +94,7 @@ export function Panel() {
       <Select
         mode="multiple"
         loading={loading}
-        style={{ minWidth: 200 }}
+        style={{ minWidth: 200, maxWidth: 800 }}
         maxTagCount={3}
         placeholder="Выберите вендор"
         options={vendorOptions}
