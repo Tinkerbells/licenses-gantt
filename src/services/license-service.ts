@@ -27,9 +27,9 @@ export class LicenseService {
       //   return await response.json()
 
       // А пока — читаем локальный JSON из public/
-      // if (env.NODE_ENV === 'development') {
-      //   return generateMockData(100)
-      // }
+      if (env.NODE_ENV === 'development') {
+        return generateMockData(100)
+      }
       return await this.getLocalData()
     }
     catch (error) {

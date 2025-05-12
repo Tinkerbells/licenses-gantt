@@ -1,11 +1,17 @@
 .home-page {
-  width: 100vw;
+  width: 100%;
   height: 100%;
-  position: relative;
+  padding: 16px;
+  position: absolute;
+  background: transparent;
+  background: var(--xenon-color-bg-layout);
 }
 
-.right-charts {
+.charts-container {
+  width: 100%;
   height: 100%;
+  padding-bottom: calc(var(--xenon-layout-header-height) * 2);
+  overflow-y: scroll;
 }
 
 .loading-overlay {
@@ -23,12 +29,7 @@
 
 @media (max-width: 1200px) {
   .home-page {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .right-charts {
-    width: 100%;
+    padding: 8px;
   }
 }
 

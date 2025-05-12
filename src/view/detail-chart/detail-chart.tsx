@@ -99,7 +99,7 @@ export function DetailChart() {
     return {
       chart: {
         type: 'line',
-        height: `${(378 / 701) * 100}%`,
+        height: `${(226 / 701) * 100}%`,
       },
       title: false,
       subtitle: false,

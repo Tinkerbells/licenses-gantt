@@ -2,10 +2,9 @@
   z-index: 999;
 }
 .aggregation-chart {
-  height: 100%;
   margin-top: 16px;
   margin-right: 16px;
-  width: 40vw;
+  width: 100%;
 }
 
 .chart-container {

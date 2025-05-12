@@ -14,8 +14,12 @@ const items: MenuItem[] = [
     key: 'logo',
   },
   {
-    label: 'Лицензии',
-    key: root.chart.$path(),
+    label: 'Главная',
+    key: root.home.$path(),
+  },
+  {
+    label: 'Статус лицензий',
+    key: root.status.$path(),
   },
 ]
 
