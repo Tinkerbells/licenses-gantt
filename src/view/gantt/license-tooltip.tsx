@@ -78,6 +78,13 @@ export const LicenseTooltip: React.FC<LicenseTooltipProps> = ({
               : 'Требуется продление'}
         </span>
       </p>
+      {license.vendor && (
+        <p style={{ margin: '4px 0', fontSize: '12px', color: '#555' }}>
+          <strong>Вендор:</strong>
+          {' '}
+          {license.vendor}
+        </p>
+      )}
       {license.term && (
         <p style={{ margin: '4px 0', fontSize: '12px', color: '#555' }}>
           <strong>Срок лицензии:</strong>

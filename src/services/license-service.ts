@@ -27,9 +27,9 @@ export class LicenseService {
       //   return await response.json()
 
       // А пока — читаем локальный JSON из public/
-      if (env.NODE_ENV === 'development') {
-        return generateMockData(100)
-      }
+      // if (env.NODE_ENV === 'development') {
+      //   return generateMockData(100)
+      // }
       return await this.getLocalData()
     }
     catch (error) {
@@ -71,9 +71,10 @@ export class LicenseService {
         date: license.expirationDate,
         amount: license.quantity,
         endDate: new Date(license.expirationDate),
-        position: 0, // Будет рассчитано в calculateVisualizationParams
-        status: 'active', // Будет обновлено в calculateVisualizationParams
+        position: 0,
+        status: 'active',
         articleCode: license.articleCode,
+        vendor: license.vendor, // Добавлено поле vendor
         productName: license.licenseName || undefined,
         term: license.term || undefined,
         unitPrice: license.unitPrice,

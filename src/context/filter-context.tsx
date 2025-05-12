@@ -30,7 +30,7 @@ interface FilterContextType {
 
   // Геттеры данных
   getCompanyList: () => string[]
-  getVendorList: () => { articleCode: string, licenseName: string }[]
+  getVendorList: () => string[]
   getAggregationData: () => AggregationData
 }
 
@@ -102,25 +102,16 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
   }
 
   // Получение списка вендоров/артикулов из данных
-  const getVendorList = (): { articleCode: string, licenseName: string }[] => {
+  const getVendorList = (): string[] => {
     if (!licensesData.length)
       return []
 
-    // Создаем Map для хранения уникальных записей по articleCode
-    const vendorMap = new Map<string, { articleCode: string, licenseName: string }>()
+    // Получаем уникальные значения вендоров
+    const vendors = Array.from(new Set(licensesData.map(license => license.vendor)))
+      .filter(Boolean) // Удаляем пустые значения
+      .sort() // Сортируем по алфавиту
 
-    licensesData.forEach((license) => {
-    // Если записи с таким articleCode еще нет - добавляем в Map
-      if (!vendorMap.has(license.articleCode)) {
-        vendorMap.set(license.articleCode, {
-          articleCode: license.articleCode,
-          licenseName: license.licenseName || license.articleCode, // Если licenseName пустой - используем articleCode
-        })
-      }
-    })
-
-    // Преобразуем Map в массив и сортируем по articleCode
-    return Array.from(vendorMap.values()).sort((a, b) => a.articleCode.localeCompare(b.articleCode))
+    return vendors
   }
 
   // Получение данных для агрегационного графика
@@ -133,13 +124,9 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
       ? licensesData.filter(license => license.customer === selectedCompany)
       : licensesData
 
-    // Убираем фильтрацию по вендору для агрегационного графика
-    // const vendorFilteredData = selectedVendor && selectedVendor.length > 0
-    //   ? filteredData.filter(license => license.articleCode === selectedVendor[0])
-    //   : filteredData
-
-    // Используем данные, отфильтрованные только по компании
-    const vendorFilteredData = filteredData
+    const vendorFilteredData = selectedVendor && selectedVendor.length > 0
+      ? filteredData.filter(license => selectedVendor.includes(license.vendor))
+      : filteredData
 
     // Фильтруем по диапазону дат, если указан
     const dateFilteredData = vendorFilteredData.filter((license) => {

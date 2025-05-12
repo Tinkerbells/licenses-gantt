@@ -14,6 +14,20 @@ function getRandomQuantity(articleCode: string): number {
     return Math.floor(Math.random() * 200) + 1
   }
 }
+const vendors = [
+  'Microsoft',
+  'Oracle',
+  'SAP',
+  'IBM',
+  'Adobe',
+  'Salesforce',
+  'VMware',
+  'Cisco',
+  'Red Hat',
+  'Kaspersky',
+  'Symantec',
+  'Autodesk',
+]
 
 // List of possible customer names based on the sample data
 const customerNames = [
@@ -138,6 +152,7 @@ export function generateMockData(count: number) {
       customer: customerNames[Math.floor(Math.random() * customerNames.length)],
       articleCode,
       licenseName: articleCode === 'Подписка Directum' ? '' : licenseNames[Math.floor(Math.random() * licenseNames.length)],
+      vendor: vendors[Math.floor(Math.random() * vendors.length)],
       term: articleCode === 'Подписка Directum' ? '1 год' : terms[Math.floor(Math.random() * terms.length)],
       quantity,
       unitPrice,

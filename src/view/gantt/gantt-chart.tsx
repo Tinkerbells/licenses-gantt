@@ -110,7 +110,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
       // Фильтрация по вендору (артикулу)
       if (selectedVendor && selectedVendor.length > 0) {
         filteredData = filteredData.filter(license =>
-          selectedVendor.includes(license.articleCode),
+          selectedVendor.includes(license.vendor),
         )
       }
 

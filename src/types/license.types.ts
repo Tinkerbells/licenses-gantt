@@ -7,6 +7,7 @@ export interface LicenseData {
   customer: string
   articleCode: string
   licenseName: string
+  vendor: string
   term: string
   quantity: number
   unitPrice: number
@@ -95,19 +96,20 @@ export type LicensesApiData = LicenseData[]
  * с дополнительными полями для отображения на диаграмме
  */
 export interface ExtendedLicense {
-  id: string // Уникальный идентификатор для React key
-  title: string // Идентификатор или артикул лицензии
-  company: string // Название компании
-  date: string // Дата окончания лицензии в формате YYYY-MM-DD
-  amount: number // Количество лицензий
-  endDate: Date // Дата окончания отображения на диаграмме
-  position: number // Позиция по вертикали (процент)
-  status: 'active' | 'expired' | 'renewal' // Статус лицензии
-  articleCode: string // Артикул продукта
-  productName?: string // Название продукта
-  term?: string // Срок лицензии
-  unitPrice?: number // Цена за единицу
-  totalPrice?: number // Общая стоимость
+  id: string
+  title: string
+  company: string
+  date: string
+  amount: number
+  endDate: Date
+  position: number
+  status: 'active' | 'expired' | 'renewal'
+  articleCode: string
+  vendor?: string
+  productName?: string
+  term?: string
+  unitPrice?: number
+  totalPrice?: number
 }
 
 /**
