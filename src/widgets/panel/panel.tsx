@@ -1,20 +1,10 @@
-/**
- * Файл: panel.tsx
- * Путь: src/widgets/panel/panel.tsx
- *
- * Описание: Компонент панели фильтров для диаграммы Ганта
- *
- * Автор: Claude AI
- * Дата обновления: 07.05.2025
- */
-
 import './panel.styles.css'
 
 import type { Dayjs } from 'dayjs'
 import type { RangePickerProps, SelectProps } from '@tinkerbells/xenon-ui'
 
 import dayjs from 'dayjs'
-import { DatePicker, Flex, Select, Spin } from '@tinkerbells/xenon-ui'
+import { DatePicker, Flex, Select } from '@tinkerbells/xenon-ui'
 
 import { useFilter } from '@/context/filter-context'
 
@@ -79,7 +69,6 @@ export function Panel() {
         value={dayjsValue}
         placeholder={['Начальная дата', 'Конечная дата']}
       />
-
       <Select
         loading={loading}
         style={{ minWidth: 200 }}
@@ -90,7 +79,6 @@ export function Panel() {
         allowClear
         showSearch
       />
-
       <Select
         mode="multiple"
         loading={loading}
@@ -103,8 +91,6 @@ export function Panel() {
         allowClear
         showSearch
       />
-
-      {loading && <Spin size="small" />}
     </Flex>
   )
 }

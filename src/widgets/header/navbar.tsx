@@ -15,7 +15,7 @@ const items: MenuItem[] = [
   },
   {
     label: 'Главная',
-    key: root.home.$path(),
+    key: root.$path(),
   },
   {
     label: 'Статус лицензий',
