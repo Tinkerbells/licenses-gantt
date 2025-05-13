@@ -128,6 +128,9 @@
   font-size: var(--xenon-font-sizesm);
   fill: var(--xenon-color-text-tertiary);
 }
+.date-label {
+  fill: var(--xenon-color-text-tertiary);
+}
 
 .nav-arrow {
   fill: #4682b4;

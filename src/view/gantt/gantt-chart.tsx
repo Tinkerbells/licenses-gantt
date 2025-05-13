@@ -71,7 +71,7 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
     barWidth: 200, // Базовая фиксированная ширина элемента лицензии
     brushHeight: 40,
     vBrushWidth: 40,
-    dotThreshold: 0.9, // Увеличиваем пороговое значение масштаба для отображения точек
+    dotThreshold: 3, // Увеличиваем пороговое значение масштаба для отображения точек
     dotRadius: 5, // Радиус точек при масштабировании
   }
 
@@ -620,9 +620,8 @@ export const LicenseGanttChart: React.FC<LicenseGanttChartProps> = ({
         .attr('x', x)
         .attr('y', yPos - 10)
         .attr('text-anchor', 'middle')
-        .attr('class', 'date-label')
+        .attr('class', 'date-label xenon-typography xenon-typography_style-strong')
         .style('font-size', '9px')
-        .style('fill', '#333')
         .style('pointer-events', 'none')
         .text(d3.timeFormat('%d.%m.%Y')(license.endDate))
     })

@@ -3,7 +3,6 @@
   height: 100%;
   padding: 16px;
   position: absolute;
-  background: transparent;
   background: var(--xenon-color-bg-layout);
 }
 
@@ -12,6 +11,7 @@
   height: 100%;
   padding-bottom: calc(var(--xenon-layout-header-height) * 2);
   overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .loading-overlay {
