@@ -25,16 +25,3 @@
   align-items: center;
   z-index: 100;
 }
-
-@media (max-width: 1200px) {
-  .home-page {
-    padding: 8px;
-  }
-}
-
-@media (max-width: 768px) {
-  .home-page {
-    overflow: auto;
-    height: auto;
-  }
-}

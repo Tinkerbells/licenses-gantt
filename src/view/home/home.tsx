@@ -8,7 +8,7 @@ import { AggregationChart } from '../aggregation-chart/aggregation-chart'
 export function Home() {
   return (
     <Flex justify="center" align="start" className="home-page">
-      <Flex gap="small" className="charts-container">
+      <Flex gap="small" justify="space-between" className="charts-container">
         <AggregationChart />
         <VendorsContainer />
       </Flex>

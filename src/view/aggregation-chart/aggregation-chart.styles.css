@@ -2,8 +2,7 @@
   z-index: 999;
 }
 .aggregation-chart {
-  margin-right: 16px;
-  width: 50%;
+  width: 50vw;
 }
 
 .chart-container {

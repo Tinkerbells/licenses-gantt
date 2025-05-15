@@ -1,11 +1,11 @@
 .detail-chart-empty-card {
   max-height: 200px;
-  width: 50%;
+  width: 50vw;
 }
 
 .detail-chart-container {
   height: 100%;
-  width: 50%;
+  width: 50vw;
 }
 .detail-chart-container__scrollarea {
   height: 100%;
