@@ -109,7 +109,7 @@ export class LicenseService {
 
     const now = Date.now()
     return sorted.map((lic, i) => {
-      const position = 20 + (i * 500) / (sorted.length > 1 ? sorted.length - 1 : 1)
+      const position = 20 + (i * 1000) / (sorted.length > 1 ? sorted.length - 1 : 1)
       const expiresAt = new Date(lic.date).getTime()
 
       let status: 'active' | 'expired' | 'renewal'
