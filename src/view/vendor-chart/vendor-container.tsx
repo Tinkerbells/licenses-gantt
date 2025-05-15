@@ -1,7 +1,7 @@
 import './vendor-chart.styles.css'
 
 import { useMemo } from 'react'
-import { Alert, Card, Empty, Flex, ScrollArea, Typography } from '@tinkerbells/xenon-ui'
+import { Alert, Card, Empty, Flex, ScrollArea } from '@tinkerbells/xenon-ui'
 
 import { useFilter } from '@/context/filter-context'
 
@@ -61,9 +61,10 @@ export function VendorsContainer() {
       )}
       <ScrollArea className="detail-chart-container__scrollarea">
         <Flex vertical className="vendor-charts-grid">
-          {displayVendors.map(vendor => (
+          {displayVendors.map((vendor, index) => (
             <div key={vendor} className="vendor-chart-wrapper">
-              <VendorChart vendor={vendor} />
+              {/* Передаем индекс как colorIndex для уникальных цветов */}
+              <VendorChart vendor={vendor} colorIndex={index} />
             </div>
           ))}
         </Flex>

@@ -1,3 +1,5 @@
+import type { Options } from 'highcharts'
+
 import { useEffect, useMemo, useState } from 'react'
 import { Card, Empty, Spin } from '@tinkerbells/xenon-ui'
 import { ChartTooltip, ChartTooltipContent, ChartTooltipItem, LineChart } from '@tinkerbells/xenon-charts'
@@ -27,7 +29,7 @@ export function SelectedCompanyChart() {
   }, [aggregatedData])
 
   // Формируем опции для Highcharts - ВАЖНО: это должно быть здесь, до любых условных return
-  const chartOptions = useMemo(() => {
+  const chartOptions: Options = useMemo(() => {
     // Если нет компании или данных - возвращаем пустые опции
     if (!selectedCompany || !aggregatedData.dates.length) {
       return {
@@ -49,13 +51,31 @@ export function SelectedCompanyChart() {
       y: aggregatedData.prices[index],
     }))
 
+    // Определяем оптимальное количество меток на оси X
+    // Используем разные интервалы в зависимости от количества точек данных
+    const dateCount = points.length
+    let tickInterval
+    let dateFormat = '{value:%d.%m.%Y}'
+
+    // Регулируем формат отображения дат и интервал тиков в зависимости от количества точек
+    if (dateCount > 10) {
+      // Для большого количества точек - показываем только день и месяц + поворачиваем метки
+      dateFormat = '{value:%d.%m}'
+      // Устанавливаем интервал между метками, чтобы не было наложений
+      tickInterval = Math.ceil(dateCount / 6) * 24 * 3600 * 1000 // Примерно 6 меток по оси X
+    }
+
     return {
       chart: {
         type: 'line',
         height: '200px',
       },
-      title: false,
-      subtitle: false,
+      title: {
+        text: undefined,
+      },
+      subtitle: {
+        text: undefined,
+      },
       series: [{
         type: 'line',
         name: selectedCompany,
@@ -74,13 +94,22 @@ export function SelectedCompanyChart() {
       xAxis: {
         type: 'datetime',
         labels: {
-          format: '{value:%d.%m.%Y}',
+          format: dateFormat,
+          // Добавляем поворот меток для предотвращения наложения
+          align: 'right',
+          style: {
+            fontSize: '10px',
+            textOverflow: 'none',
+          },
         },
-        tickPixelInterval: 80,
+        // Динамический интервал между метками
+        tickInterval,
         crosshair: true,
       },
       yAxis: {
-        title: false,
+        title: {
+          text: undefined,
+        },
         tickPixelInterval: 40,
       },
       credits: {
@@ -122,7 +151,7 @@ export function SelectedCompanyChart() {
     if (loading) {
       return (
         <div className="chart-loading-container">
-          <Spin fullscreen>Загрузка данных...</Spin>
+          <Spin />
         </div>
       )
     }

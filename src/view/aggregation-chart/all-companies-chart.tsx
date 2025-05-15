@@ -1,5 +1,7 @@
+import type { Options } from 'highcharts'
+
 import { useEffect, useMemo, useState } from 'react'
-import { Card, Empty, Spin } from '@tinkerbells/xenon-ui'
+import { Card, Empty, Flex, Spin } from '@tinkerbells/xenon-ui'
 import { ChartTooltip, ChartTooltipContent, ChartTooltipItem, LineChart } from '@tinkerbells/xenon-charts'
 
 import { useFilter } from '@/context/filter-context'
@@ -25,7 +27,7 @@ export function AllCompaniesChart() {
   }, [aggregatedData])
 
   // Формируем опции для Highcharts
-  const chartOptions = useMemo(() => {
+  const chartOptions: Options = useMemo(() => {
     // Если нет данных - возвращаем пустые опции
     if (!aggregatedData.dates.length) {
       return {
@@ -47,13 +49,31 @@ export function AllCompaniesChart() {
       y: aggregatedData.prices[index], // Переводим в тысячи рублей
     }))
 
+    // Определяем оптимальное количество меток на оси X
+    // Используем разные интервалы в зависимости от количества точек данных
+    const dateCount = points.length
+    let tickInterval
+    let dateFormat = '{value:%d.%m.%Y}'
+
+    // Регулируем формат отображения дат и интервал тиков в зависимости от количества точек
+    if (dateCount > 10) {
+      // Для большого количества точек - показываем только день и месяц + поворачиваем метки
+      dateFormat = '{value:%d.%m}'
+      // Устанавливаем интервал между метками, чтобы не было наложений
+      tickInterval = Math.ceil(dateCount / 6) * 24 * 3600 * 1000 // Примерно 6 меток по оси X
+    }
+
     return {
       chart: {
         type: 'line',
         height: '200px',
       },
-      title: false,
-      subtitle: false,
+      title: {
+        text: undefined,
+      },
+      subtitle: {
+        text: undefined,
+      },
       series: [{
         type: 'line',
         name: 'Все компании',
@@ -72,13 +92,21 @@ export function AllCompaniesChart() {
       xAxis: {
         type: 'datetime',
         labels: {
-          format: '{value:%d.%m.%Y}',
+          format: dateFormat,
+          align: 'right',
+          style: {
+            fontSize: '10px',
+            textOverflow: 'none',
+          },
         },
-        tickPixelInterval: 80,
+        // Динамический интервал между метками
+        tickInterval,
         crosshair: true,
       },
       yAxis: {
-        title: false,
+        title: {
+          text: undefined,
+        },
         tickPixelInterval: 40,
       },
       credits: {
@@ -107,12 +135,9 @@ export function AllCompaniesChart() {
   const renderChartContent = () => {
     if (loading) {
       return (
-        <div className="chart-loading-container">
-          {/* Исправляем использование Spin */}
-          <Spin>
-            <div style={{ padding: '20px' }}>Загрузка данных...</div>
-          </Spin>
-        </div>
+        <Flex justify="center" align="center" className="chart-loading-container">
+          <Spin />
+        </Flex>
       )
     }
 

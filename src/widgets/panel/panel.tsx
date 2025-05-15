@@ -34,7 +34,7 @@ export function Panel() {
     value: vendor,
   }))
 
-  companyOptions.unshift({ label: 'Все компании', value: '' })
+  companyOptions.unshift({ label: 'Выберите компанию', value: '' })
 
   const handleCompanyChange = (value: string) => {
     setSelectedCompany(value || null)

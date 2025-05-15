@@ -44,7 +44,7 @@ interface FilterContextType {
   getAllCompaniesAggregationData: () => AggregationData
   getAggregationData: () => AggregationData
   getDetailData: () => { name: string, data: { x: number, y: number }[] }[]
-  // Новый метод для получения данных по одному вендору
+  // Метод для получения данных по одному вендору
   getDetailDataForVendor: (vendor: string) => { name: string, data: { x: number, y: number }[] } | null
 
 }
@@ -258,7 +258,7 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
     return {
       dates,
       prices,
-      company: selectedCompany || 'Все компании',
+      company: selectedCompany || 'Выберите компанию',
     }
   }
 
@@ -321,7 +321,8 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
     }).filter(series => series.data.length > 0) // Убираем пустые серии
   }
 
-  // Новый метод: получение данных для одного конкретного вендора
+  // ИЗМЕНЕНО: метод для получения данных по одному конкретному вендору
+  // Теперь НЕ применяет фильтр по компании - графики вендоров должны быть независимы
   const getDetailDataForVendor = (vendor: string) => {
     if (!licensesData.length || !vendor) {
       return null
@@ -330,13 +331,13 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
     // Фильтруем данные только по указанному вендору
     const vendorData = licensesData.filter(license => license.vendor === vendor)
 
-    // Применяем фильтр по выбранной компании, если указан
-    const companyFilteredData = selectedCompany
-      ? vendorData.filter(license => license.customer === selectedCompany)
-      : vendorData
+    // ИЗМЕНЕНО: НЕ применяем фильтр по выбранной компании
+    // const companyFilteredData = selectedCompany
+    //   ? vendorData.filter(license => license.customer === selectedCompany)
+    //   : vendorData
 
     // Применяем фильтр по диапазону дат, если он установлен
-    const dateFilteredData = companyFilteredData.filter((license) => {
+    const dateFilteredData = vendorData.filter((license) => {
       const licenseDate = new Date(license.expirationDate)
 
       // Проверяем, что дата корректно спарсилась

@@ -13,6 +13,8 @@
 }
 
 .chart-container {
+  width: 100%;
+  height: 100%;
   z-index: 999;
   position: relative;
 }
@@ -54,4 +56,7 @@
 .stat-date {
   color: var(--xenon-color-text-secondary);
   font-size: var(--xenon-font-sizesm);
+}
+.xenon-card-body {
+  height: 75%;
 }
