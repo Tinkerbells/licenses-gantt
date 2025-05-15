@@ -1,5 +1,18 @@
+.detail-chart-empty-card {
+  max-height: 200px;
+  width: 50%;
+}
+
+.detail-chart-container {
+  height: 100%;
+  width: 50%;
+}
+.detail-chart-container__scrollarea {
+  height: 100%;
+}
+
 .detail-chart {
-  width: 100%;
+  width: 50%;
   margin-right: 16px;
   margin-bottom: 16px;
 }

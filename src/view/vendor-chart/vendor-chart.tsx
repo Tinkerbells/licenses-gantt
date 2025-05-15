@@ -1,61 +1,64 @@
-import './detail-chart.styles.css'
-
-import { useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { Card, Empty, Spin } from '@tinkerbells/xenon-ui'
 import { ChartTooltip, ChartTooltipContent, ChartTooltipItem, LineChart } from '@tinkerbells/xenon-charts'
 
 import { useFilter } from '@/context/filter-context'
 import { formatRub } from '@/shared/lib/utils/format-rub'
 
-export function DetailChart() {
+interface VendorChartProps {
+  vendor: string
+}
+
+export const VendorChart: React.FC<VendorChartProps> = ({ vendor }) => {
   const {
     loading,
     error,
-    selectedVendor,
-    getDetailData,
+    getDetailDataForVendor,
   } = useFilter()
 
-  // Используем новую функцию getDetailData вместо прямой обработки данных
+  // Получаем данные для конкретного вендора
   const chartData = useMemo(() => {
-    if (loading || !selectedVendor || selectedVendor.length === 0) {
-      return []
+    if (loading || !vendor) {
+      return null
     }
 
-    return getDetailData()
-  }, [getDetailData, selectedVendor, loading])
+    return getDetailDataForVendor(vendor)
+  }, [getDetailDataForVendor, vendor, loading])
 
-  // Определяем максимальное значение для всех серий для настройки оси Y
+  // Определяем максимальное значение для серии для настройки оси Y
   const maxValue = useMemo(() => {
-    if (!chartData.length)
+    if (!chartData || !chartData.data.length) {
       return 1000
+    }
 
-    return Math.max(
-      ...chartData.flatMap(series =>
-        series.data.map(point => point.y),
-      ),
-    ) * 1.1 // Добавляем 10% сверху для лучшего отображения
+    return Math.max(...chartData.data.map(point => point.y)) * 1.1 // Добавляем 10% сверху для лучшего отображения
   }, [chartData])
 
   // Конфигурация графика
   /* eslint-disable ts/ban-ts-comment */
   // @ts-ignore
   const chartOptions: Highcharts.Options = useMemo(() => {
+    if (!chartData) {
+      return {}
+    }
+
     return {
       chart: {
         type: 'line',
-        height: '300px',
+        height: '150px',
       },
       title: false,
       subtitle: false,
-      series: chartData.map(series => ({
+      series: [{
         type: 'line',
-        name: series.name,
-        data: series.data,
+        name: chartData.name,
+        data: chartData.data,
         marker: {
           enabled: true,
           radius: 3,
         },
-      })),
+      }],
+      legend: false,
       tooltip: {
         valueDecimals: 3,
         valuePrefix: '',
@@ -71,7 +74,7 @@ export function DetailChart() {
       yAxis: {
         title: false,
         max: maxValue,
-        tickPixelInterval: 40,
+        tickPixelInterval: 30,
       },
       credits: {
         enabled: false,
@@ -79,7 +82,7 @@ export function DetailChart() {
       plotOptions: {
         series: {
           animation: {
-            duration: 500,
+            duration: 300,
           },
           lineWidth: 2,
           states: {
@@ -111,10 +114,10 @@ export function DetailChart() {
       )
     }
 
-    if (!chartData.length) {
+    if (!chartData) {
       return (
         <Empty
-          description="Выберите вендор для отображения данных"
+          description="Нет данных для отображения"
           image={Empty.PRESENTED_IMAGE_SIMPLE}
         />
       )
@@ -130,8 +133,8 @@ export function DetailChart() {
                   <ChartTooltipItem>
                     {ctx.series.name}
                     :
-                    &nbsp;
                     <b>{Math.floor(Number(ctx.y))}</b>
+                    {' '}
                     т.р.
                   </ChartTooltipItem>
                 )
@@ -144,23 +147,35 @@ export function DetailChart() {
     )
   }
 
-  // Статистика по выбранным вендорам
+  // Статистика по выбранному вендору
   const renderStats = () => {
-    if (!chartData.length || loading)
+    if (!chartData || loading) {
       return null
+    }
 
-    const totalSum = chartData.reduce((sum, series) =>
-      sum + series.data.reduce((seriesSum, point) => seriesSum + point.y, 0), 0)
+    // Считаем общую сумму для вендора
+    const totalSum = chartData.data.reduce((sum, point) => sum + point.y, 0)
+
+    // Находим максимальное значение и его дату
+    const maxPoint = chartData.data.reduce((max, point) =>
+      point.y > max.y ? point : max, { x: 0, y: 0 })
+
+    const maxDate = maxPoint.x ? new Date(maxPoint.x).toLocaleDateString('ru-RU') : 'Н/Д'
 
     return (
-      <div className="chart-statistics">
-        <div className="stat-item">
-          <span className="stat-label">Выбрано вендоров:</span>
-          <span className="stat-value">{chartData.length}</span>
-        </div>
+      <div className="chart-statistics vendor-chart-statistics">
         <div className="stat-item">
           <span className="stat-label">Общая сумма:</span>
           <span className="stat-value">{formatRub(totalSum * 1000)}</span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-label">Максимальный платеж:</span>
+          <span className="stat-value">{formatRub(maxPoint.y * 1000)}</span>
+          <span className="stat-date">
+            (
+            {maxDate}
+            )
+          </span>
         </div>
       </div>
     )
@@ -168,14 +183,13 @@ export function DetailChart() {
 
   return (
     <Card
-      title="Детализация по вендорам, т.р."
-      className="detail-chart"
+      title={`${vendor}`}
+      className="vendor-chart"
       size="small"
     >
       <div className="chart-container">
         {renderContent()}
       </div>
-      {renderStats()}
     </Card>
   )
 }

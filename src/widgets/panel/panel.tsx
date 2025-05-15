@@ -84,6 +84,7 @@ export function Panel() {
         loading={loading}
         style={{ minWidth: 200, maxWidth: 800 }}
         maxTagCount={1}
+        maxCount={6}
         placeholder="Выберите вендор"
         options={vendorOptions}
         onChange={handleVendorChange}

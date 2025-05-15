@@ -43,6 +43,8 @@ interface FilterContextType {
   // Получение данных с учетом только релевантных фильтров
   getAggregationData: () => AggregationData
   getDetailData: () => { name: string, data: { x: number, y: number }[] }[]
+  // Новый метод для получения данных по одному вендору
+  getDetailDataForVendor: (vendor: string) => { name: string, data: { x: number, y: number }[] } | null
 }
 
 // Создание контекста с начальными значениями
@@ -63,6 +65,7 @@ const FilterContext = createContext<FilterContextType>({
   getVendorList: () => [],
   getAggregationData: () => ({ dates: [], prices: [] }),
   getDetailData: () => [],
+  getDetailDataForVendor: () => null,
 })
 
 // Интерфейс для пропсов провайдера
@@ -206,7 +209,7 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
     }
   }
 
-  // Новая функция: получение данных для графика детализации - использует ТОЛЬКО фильтры вендора и даты
+  // Получение данных для графика детализации - использует ТОЛЬКО фильтры вендора и даты
   const getDetailData = () => {
     if (!licensesData.length || !selectedVendor || selectedVendor.length === 0) {
       return []
@@ -265,6 +268,75 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
     }).filter(series => series.data.length > 0) // Убираем пустые серии
   }
 
+  // Новый метод: получение данных для одного конкретного вендора
+  const getDetailDataForVendor = (vendor: string) => {
+    if (!licensesData.length || !vendor) {
+      return null
+    }
+
+    // Фильтруем данные только по указанному вендору
+    const vendorData = licensesData.filter(license => license.vendor === vendor)
+
+    // Применяем фильтр по выбранной компании, если указан
+    const companyFilteredData = selectedCompany
+      ? vendorData.filter(license => license.customer === selectedCompany)
+      : vendorData
+
+    // Применяем фильтр по диапазону дат, если он установлен
+    const dateFilteredData = companyFilteredData.filter((license) => {
+      const licenseDate = new Date(license.expirationDate)
+
+      // Проверяем, что дата корректно спарсилась
+      if (Number.isNaN(licenseDate.getTime())) {
+        return false
+      }
+
+      const startFilter = dateRange[0] ? licenseDate >= dateRange[0] : true
+      const endFilter = dateRange[1] ? licenseDate <= dateRange[1] : true
+      return startFilter && endFilter
+    })
+
+    // Группируем по датам и суммируем
+    const groupedByDate: Record<string, number> = {}
+    dateFilteredData.forEach((license) => {
+      const date = license.expirationDate
+      if (!groupedByDate[date]) {
+        groupedByDate[date] = 0
+      }
+      groupedByDate[date] += license.totalPrice
+    })
+
+    // Если нет данных, возвращаем пустой массив
+    if (Object.keys(groupedByDate).length === 0) {
+      return {
+        name: vendor,
+        data: [],
+      }
+    }
+
+    // Сортируем даты в хронологическом порядке
+    const sortedDates = Object.keys(groupedByDate).sort((a, b) => {
+      const dateA = new Date(a)
+      const dateB = new Date(b)
+      return dateA.getTime() - dateB.getTime()
+    })
+
+    // Формируем массив точек для графика
+    const points = sortedDates.map((date) => {
+      const jsDate = new Date(date)
+
+      return {
+        x: jsDate.getTime(),
+        y: groupedByDate[date], // Преобразуем в тысячи рублей
+      }
+    })
+
+    return {
+      name: vendor,
+      data: points,
+    }
+  }
+
   // Значение контекста
   const value: FilterContextType = {
     licensesData,
@@ -283,6 +355,7 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
     getVendorList,
     getAggregationData,
     getDetailData,
+    getDetailDataForVendor,
   }
 
   return (
@@ -292,5 +365,4 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
   )
 }
 
-// Хук для использования контекста
 export const useFilter = () => useContext(FilterContext)
