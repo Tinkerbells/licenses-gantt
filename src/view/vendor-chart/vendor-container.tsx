@@ -60,7 +60,7 @@ export function VendorsContainer() {
         />
       )}
       <ScrollArea className="detail-chart-container__scrollarea">
-        <Flex vertical gap="middle" className="vendor-charts-grid">
+        <Flex vertical className="vendor-charts-grid">
           {displayVendors.map(vendor => (
             <div key={vendor} className="vendor-chart-wrapper">
               <VendorChart vendor={vendor} />

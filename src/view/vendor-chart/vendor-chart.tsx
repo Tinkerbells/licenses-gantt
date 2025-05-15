@@ -45,7 +45,7 @@ export const VendorChart: React.FC<VendorChartProps> = ({ vendor }) => {
     return {
       chart: {
         type: 'line',
-        height: '150px',
+        height: '200px',
       },
       title: false,
       subtitle: false,

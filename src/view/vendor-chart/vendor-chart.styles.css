@@ -2,6 +2,9 @@
   max-height: 200px;
   width: 50vw;
 }
+.vendor-charts-grid {
+  gap: var(--xenon-padding-xs);
+}
 
 .detail-chart-container {
   height: 100%;

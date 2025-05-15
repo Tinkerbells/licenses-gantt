@@ -41,10 +41,12 @@ interface FilterContextType {
   getVendorList: () => string[]
 
   // Получение данных с учетом только релевантных фильтров
+  getAllCompaniesAggregationData: () => AggregationData
   getAggregationData: () => AggregationData
   getDetailData: () => { name: string, data: { x: number, y: number }[] }[]
   // Новый метод для получения данных по одному вендору
   getDetailDataForVendor: (vendor: string) => { name: string, data: { x: number, y: number }[] } | null
+
 }
 
 // Создание контекста с начальными значениями
@@ -64,6 +66,7 @@ const FilterContext = createContext<FilterContextType>({
   getCompanyList: () => [],
   getVendorList: () => [],
   getAggregationData: () => ({ dates: [], prices: [] }),
+  getAllCompaniesAggregationData: () => ({ dates: [], prices: [] }),
   getDetailData: () => [],
   getDetailDataForVendor: () => null,
 })
@@ -153,6 +156,56 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
       .sort() // Сортируем по алфавиту
 
     return vendors
+  }
+  const getAllCompaniesAggregationData = (): AggregationData => {
+    if (!licensesData.length)
+      return { dates: [], prices: [] }
+
+    // Всегда используем все компании, игнорируя selectedCompany
+    const filteredData = licensesData
+
+    // Применяем только фильтр дат
+    const dateFilteredData = filteredData.filter((license) => {
+      const licenseDate = new Date(license.expirationDate)
+
+      const startFilter = dateRange[0]
+        ? licenseDate >= dateRange[0]
+        : true
+
+      const endFilter = dateRange[1]
+        ? licenseDate <= dateRange[1]
+        : true
+
+      return startFilter && endFilter
+    })
+
+    // Группируем данные по датам и суммируем стоимость
+    const aggregatedData: Record<string, number> = {}
+
+    dateFilteredData.forEach((license) => {
+      const date = license.expirationDate
+
+      if (!aggregatedData[date]) {
+        aggregatedData[date] = 0
+      }
+
+      aggregatedData[date] += license.totalPrice
+    })
+
+    // Сортируем даты
+    const sortedDates = Object.keys(aggregatedData).sort((a, b) =>
+      new Date(a).getTime() - new Date(b).getTime(),
+    )
+
+    // Формируем массивы для графика
+    const dates = sortedDates
+    const prices = sortedDates.map(date => aggregatedData[date])
+
+    return {
+      dates,
+      prices,
+      company: 'Все компании',
+    }
   }
 
   // Получение данных для агрегационного графика - использует ТОЛЬКО фильтры компании и даты
@@ -353,6 +406,7 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
 
     getCompanyList,
     getVendorList,
+    getAllCompaniesAggregationData,
     getAggregationData,
     getDetailData,
     getDetailDataForVendor,

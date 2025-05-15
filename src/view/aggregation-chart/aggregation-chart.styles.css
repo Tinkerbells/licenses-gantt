@@ -1,8 +1,15 @@
+.aggregation-charts-container {
+  width: 50vw;
+  gap: var(--xenon-padding-xs);
+}
+
+.aggregation-chart {
+  width: 100%;
+  min-height: 200px;
+}
+
 .highcharts-tooltip {
   z-index: 999;
-}
-.aggregation-chart {
-  width: 50vw;
 }
 
 .chart-container {
@@ -47,16 +54,4 @@
 .stat-date {
   color: var(--xenon-color-text-secondary);
   font-size: var(--xenon-font-sizesm);
-}
-
-@media (max-width: 768px) {
-  .aggregation-chart {
-    width: 90vw;
-    margin-left: 16px;
-  }
-
-  .aggregation-stats {
-    flex-direction: column;
-    gap: 8px;
-  }
 }

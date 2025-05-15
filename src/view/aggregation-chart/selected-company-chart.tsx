@@ -1,13 +1,10 @@
-import './aggregation-chart.styles.css'
-
 import { useEffect, useMemo, useState } from 'react'
 import { Card, Empty, Spin } from '@tinkerbells/xenon-ui'
 import { ChartTooltip, ChartTooltipContent, ChartTooltipItem, LineChart } from '@tinkerbells/xenon-charts'
 
 import { useFilter } from '@/context/filter-context'
-import { formatRub } from '@/shared/lib/utils/format-rub'
 
-export function AggregationChart() {
+export function SelectedCompanyChart() {
   const {
     loading,
     error,
@@ -18,8 +15,7 @@ export function AggregationChart() {
   // Локальное состояние для отслеживания, есть ли данные для отображения
   const [hasData, setHasData] = useState(false)
 
-  // Получаем агрегированные данные для графика
-  // Важно: теперь функция getAggregationData игнорирует фильтр selectedVendor
+  // Получаем агрегированные данные для графика по выбранной компании
   const aggregatedData = useMemo(() => getAggregationData(), [
     selectedCompany,
     getAggregationData,
@@ -30,26 +26,39 @@ export function AggregationChart() {
     setHasData(aggregatedData.dates.length > 0)
   }, [aggregatedData])
 
-  // Формируем опции для Highcharts
-  /* eslint-disable ts/ban-ts-comment */
-  // @ts-ignore
-  const chartOptions: Highcharts.Options = useMemo(() => {
+  // Формируем опции для Highcharts - ВАЖНО: это должно быть здесь, до любых условных return
+  const chartOptions = useMemo(() => {
+    // Если нет компании или данных - возвращаем пустые опции
+    if (!selectedCompany || !aggregatedData.dates.length) {
+      return {
+        chart: {
+          type: 'line',
+          height: '200px',
+        },
+        series: [{
+          type: 'line',
+          name: 'Нет данных',
+          data: [],
+        }],
+      }
+    }
+
     // Формируем точки для графика в формате Highcharts
     const points = aggregatedData.dates.map((date, index) => ({
       x: new Date(date).getTime(),
-      y: aggregatedData.prices[index], // Переводим в тысячи рублей
+      y: aggregatedData.prices[index],
     }))
 
     return {
       chart: {
         type: 'line',
-        height: '300px',
+        height: '200px',
       },
       title: false,
       subtitle: false,
       series: [{
         type: 'line',
-        name: selectedCompany || 'Все компании',
+        name: selectedCompany,
         data: points,
         marker: {
           enabled: true,
@@ -60,7 +69,7 @@ export function AggregationChart() {
           valuePrefix: '',
           valueSuffix: ' т.р.',
         },
-        color: 'var(--xenon-color-primary)',
+        color: 'var(--xenon-color-success)',
       }],
       xAxis: {
         type: 'datetime',
@@ -73,11 +82,6 @@ export function AggregationChart() {
       yAxis: {
         title: false,
         tickPixelInterval: 40,
-        labels: {
-          formatter() {
-            return this.value.toLocaleString('ru-RU')
-          },
-        },
       },
       credits: {
         enabled: false,
@@ -101,17 +105,24 @@ export function AggregationChart() {
     }
   }, [aggregatedData, selectedCompany])
 
-  // Определяем заголовок графика на основе выбранной компании
-  const chartTitle = selectedCompany
-    ? `Агрегация по компании "${selectedCompany}", т.р.`
-    : 'Общая агрегация, т.р.'
+  // Если компания не выбрана, показываем соответствующее сообщение
+  if (!selectedCompany) {
+    return (
+      <Card title="Детализация по компании" className="aggregation-chart" size="small">
+        <Empty
+          description="Выберите компанию для отображения детальных данных"
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
+      </Card>
+    )
+  }
 
   // Рендеринг содержимого графика в зависимости от состояния
   const renderChartContent = () => {
     if (loading) {
       return (
         <div className="chart-loading-container">
-          <Spin tip="Загрузка данных..." />
+          <Spin fullscreen>Загрузка данных...</Spin>
         </div>
       )
     }
@@ -128,7 +139,7 @@ export function AggregationChart() {
     if (!hasData) {
       return (
         <Empty
-          description="Нет данных для отображения"
+          description="Нет данных для отображения по выбранной компании"
           image={Empty.PRESENTED_IMAGE_SIMPLE}
         />
       )
@@ -155,42 +166,15 @@ export function AggregationChart() {
     )
   }
 
-  // Рендерим статистику под графиком, если есть данные
-  const renderStats = () => {
-    if (!hasData || loading)
-      return null
-
-    // Считаем общую сумму
-    const totalSum = aggregatedData.prices.reduce((sum, price) => sum + price, 0)
-    // Находим максимальное значение
-    const maxValue = Math.max(...aggregatedData.prices)
-    const maxValueDate = aggregatedData.dates[aggregatedData.prices.indexOf(maxValue)]
-
-    return (
-      <div className="aggregation-stats">
-        <div className="stat-item">
-          <span className="stat-label">Общая сумма:</span>
-          <span className="stat-value">{formatRub(totalSum)}</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-label">Максимальный платеж:</span>
-          <span className="stat-value">{formatRub(maxValue)}</span>
-          <span className="stat-date">
-            (
-            {new Date(maxValueDate).toLocaleDateString('ru-RU')}
-            )
-          </span>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <Card title={chartTitle} className="aggregation-chart" size="small">
+    <Card
+      title={`Детализация по компании "${selectedCompany}"`}
+      className="aggregation-chart"
+      size="small"
+    >
       <div className="chart-container">
         {renderChartContent()}
       </div>
-      {renderStats()}
     </Card>
   )
 }

@@ -71,7 +71,7 @@ export function Panel() {
       />
       <Select
         loading={loading}
-        style={{ minWidth: 200 }}
+        style={{ minWidth: 300, maxWidth: 300 }}
         placeholder="Выберите заказчика"
         options={companyOptions}
         onChange={handleCompanyChange}
