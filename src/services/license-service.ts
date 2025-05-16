@@ -43,19 +43,21 @@ export class LicenseService {
    * @returns Данные лицензий из выбранного JSON файла
    */
   private static async getLocalData(dataSource: DataSource): Promise<LicensesApiData> {
-    // Выбираем файл в зависимости от источника данных
+  // Выбираем файл в зависимости от источника данных
     const dataFile = dataSource === 'status' ? 'data-short.json' : 'data.json'
+    // Сохраняем базовый путь /licenses для доступа к файлам
+    const basePath = '/licenses'
 
-    console.log(`Загрузка данных из: ${dataFile} для страницы ${dataSource}`)
+    console.log(`Загрузка данных из: ${basePath}/${dataFile} для страницы ${dataSource}`)
 
-    const response = await fetch(`${env.BASE_URL}/${dataFile}`, {
+    const response = await fetch(`${basePath}/${dataFile}`, {
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
         'Accept': 'application/json; charset=UTF-8',
       },
     })
     if (!response.ok) {
-      throw new Error(`Не удалось загрузить локальные данные по адресу ${env.BASE_URL}/${dataFile}: ${response.status}`)
+      throw new Error(`Не удалось загрузить локальные данные по адресу ${basePath}/${dataFile}: ${response.status}`)
     }
     // небольшая искусственная задержка, если хотите имитировать загрузку
     await new Promise(r => setTimeout(r, 800))

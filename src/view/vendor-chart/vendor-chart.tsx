@@ -42,19 +42,7 @@ export const VendorChart: React.FC<VendorChartProps> = ({ vendor, colorIndex }) 
       return {}
     }
 
-    // Определяем оптимальное количество меток на оси X
-    // Используем разные интервалы в зависимости от количества точек данных
-    const dateCount = chartData.data.length
-    let tickInterval
-    let dateFormat = '{value:%d.%m.%Y}'
-
-    // Регулируем формат отображения дат и интервал тиков в зависимости от количества точек
-    if (dateCount > 10) {
-      // Для большого количества точек - показываем только день и месяц + поворачиваем метки
-      dateFormat = '{value:%d.%m}'
-      // Устанавливаем интервал между метками, чтобы не было наложений
-      tickInterval = Math.ceil(dateCount / 6) * 24 * 3600 * 1000 // Примерно 6 меток по оси X
-    }
+    const dateFormat = '{value:%d.%m}'
 
     return {
       chart: {
@@ -83,7 +71,7 @@ export const VendorChart: React.FC<VendorChartProps> = ({ vendor, colorIndex }) 
         xDateFormat: '%e-%m-%Y', // Формат даты в tooltip
         useHTML: true,
         headerFormat: '<span style="font-size: 10px">{point.key}</span><br/>',
-        pointFormat: '<span style="color:{point.color}"></span> {series.name}: <b>{point.y}</b> т.р.<br/>',
+        pointFormat: '<span style="color:{point.color}"></span> {series.name}: <b>{point.y}</b>',
       },
       xAxis: {
         type: 'datetime',
@@ -95,14 +83,13 @@ export const VendorChart: React.FC<VendorChartProps> = ({ vendor, colorIndex }) 
             textOverflow: 'none',
           },
         },
-        // Динамический интервал между метками
-        tickInterval,
+        tickInterval: 10,
         crosshair: true,
       },
       yAxis: {
         title: false,
         max: maxValue,
-        tickPixelInterval: 30,
+        tickPixelInterval: 70,
       },
       credits: {
         enabled: false,

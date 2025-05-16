@@ -78,7 +78,7 @@ interface FilterProviderProps {
 
 // Функция для определения источника данных на основе пути
 function getDataSourceFromPath(pathname: string): DataSource {
-  if (pathname.includes(root.status.$path())) {
+  if (pathname.includes('/status') || pathname.includes('#/status')) {
     return 'status'
   }
   return 'home'
