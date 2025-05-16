@@ -80,6 +80,7 @@ export function SelectedCompanyChart() {
         type: 'line',
         name: selectedCompany,
         data: points,
+        colorIndex: 1,
         marker: {
           enabled: true,
           radius: 4,
@@ -88,6 +89,10 @@ export function SelectedCompanyChart() {
           valueDecimals: 0,
           valuePrefix: '',
           valueSuffix: ' т.р.',
+          xDateFormat: '%e-%m-%Y', // Формат даты в tooltip
+          useHTML: true,
+          headerFormat: '<span style="font-size: 10px">{point.key}</span><br/>',
+          pointFormat: '<span style="color:{point.color}"></span> {series.name}: <b>{point.y}</b> т.р.<br/>',
         },
         color: 'var(--xenon-color-success)',
       }],

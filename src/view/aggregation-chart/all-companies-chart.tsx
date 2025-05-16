@@ -86,6 +86,10 @@ export function AllCompaniesChart() {
           valueDecimals: 0,
           valuePrefix: '',
           valueSuffix: ' т.р.',
+          xDateFormat: '%e-%m-%Y', // Формат даты в tooltip
+          useHTML: true,
+          headerFormat: '<span style="font-size: 10px">{point.key}</span><br/>',
+          pointFormat: '<span style="color:{point.color}"></span> {series.name}: <b>{point.y}</b> т.р.<br/>',
         },
         color: 'var(--xenon-color-primary)',
       }],
