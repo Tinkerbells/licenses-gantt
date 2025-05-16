@@ -77,9 +77,9 @@ export const VendorChart: React.FC<VendorChartProps> = ({ vendor, colorIndex }) 
       }],
       legend: false,
       tooltip: {
-        valueDecimals: 3,
+        valueDecimals: 0,
         valuePrefix: '',
-        valueSuffix: '',
+        valueSuffix: ' т.р.',
       },
       xAxis: {
         type: 'datetime',
