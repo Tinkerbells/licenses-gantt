@@ -33,7 +33,7 @@ export function AllCompaniesChart() {
       return {
         chart: {
           type: 'line',
-          height: '200px',
+          height: '400px',
         },
         series: [{
           type: 'line',
@@ -57,7 +57,7 @@ export function AllCompaniesChart() {
     return {
       chart: {
         type: 'line',
-        height: '200px',
+        height: '50%',
       },
       title: {
         text: undefined,

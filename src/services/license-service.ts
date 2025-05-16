@@ -1,5 +1,3 @@
-import { env } from '@/shared/env'
-
 import type { ExtendedLicense, LicensesApiData } from '../types/license.types'
 
 // import { generateMockData } from './license-mock'

@@ -6,7 +6,6 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 import type { DataSource } from '@/services/license-service'
 import type { LicensesApiData } from '@/types/license.types'
 
-import { root } from '@/shared/router'
 import { LicenseService } from '@/services/license-service'
 
 // Интерфейс для описания данных агрегации
