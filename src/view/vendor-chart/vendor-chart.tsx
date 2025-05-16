@@ -6,7 +6,7 @@ import { useFilter } from '@/context/filter-context'
 
 interface VendorChartProps {
   vendor: string
-  colorIndex: number // Индекс для определения цвета графика
+  colorIndex: number
 }
 
 export const VendorChart: React.FC<VendorChartProps> = ({ vendor, colorIndex }) => {
@@ -34,6 +34,59 @@ export const VendorChart: React.FC<VendorChartProps> = ({ vendor, colorIndex }) 
     return Math.max(...chartData.data.map(point => point.y)) * 1.1 // Добавляем 10% сверху для лучшего отображения
   }, [chartData])
 
+  // Вычисляем адаптивные настройки тиков для оси X, основываясь на количестве точек данных
+  const xAxisTickConfig = useMemo(() => {
+    if (!chartData || !chartData.data.length) {
+      return {
+        tickInterval: 365 * 24 * 3600 * 1000, // 1 год в миллисекундах по умолчанию
+        dateFormat: '{value:%Y}', // Формат год
+      }
+    }
+
+    // Константы для расчетов временных интервалов
+    const ONE_DAY = 24 * 3600 * 1000
+    const ONE_MONTH = 30 * ONE_DAY
+    const ONE_QUARTER = 3 * ONE_MONTH
+    const ONE_YEAR = 365 * ONE_DAY
+
+    // Находим минимальную и максимальную даты в данных
+    const timestamps = chartData.data.map(point => point.x)
+    const minDate = Math.min(...timestamps)
+    const maxDate = Math.max(...timestamps)
+    const totalRange = maxDate - minDate
+
+    // Определяем, сколько точек данных у нас есть
+    const pointCount = chartData.data.length
+
+    // Определяем приблизительную плотность точек (сколько точек на год)
+    const pointsPerYear = (pointCount * ONE_YEAR) / totalRange
+
+    // Если точек мало (менее 4 на год) или их очень мало в целом (меньше 5),
+    // то можем использовать годовой интервал
+    if (pointsPerYear <= 4 || pointCount < 5) {
+      return {
+        tickInterval: ONE_YEAR,
+        dateFormat: '{value:%Y}', // Только год
+      }
+    }
+
+    // Если точек умеренное количество (4-12 на год или общее количество 5-15),
+    // используем квартальный интервал
+    if (pointsPerYear <= 12 || pointCount < 15) {
+      return {
+        tickInterval: ONE_QUARTER,
+        dateFormat: '{value:%q кв. %Y}', // Квартал и год (Q1 2023)
+      }
+    }
+
+    // Если точек много (более 12 на год или больше 15 всего),
+    // используем месячный интервал
+    return {
+      tickInterval: ONE_MONTH,
+      dateFormat: '{value:%m.%Y}', // Месяц и год (01.2023)
+    }
+  }, [chartData])
+
   // Конфигурация графика
   /* eslint-disable ts/ban-ts-comment */
   // @ts-ignore
@@ -42,14 +95,10 @@ export const VendorChart: React.FC<VendorChartProps> = ({ vendor, colorIndex }) 
       return {}
     }
 
-    const dateFormat = '{value:%d.%m}'
-
     return {
       chart: {
         type: 'line',
         height: '200px',
-        // В styled mode не указываем color здесь,
-        // вместо этого используем colorIndex для применения CSS-классов
       },
       title: false,
       subtitle: false,
@@ -76,14 +125,14 @@ export const VendorChart: React.FC<VendorChartProps> = ({ vendor, colorIndex }) 
       xAxis: {
         type: 'datetime',
         labels: {
-          format: dateFormat,
+          format: xAxisTickConfig.dateFormat,
           align: 'right',
           style: {
             fontSize: '10px',
             textOverflow: 'none',
           },
         },
-        tickInterval: 10,
+        tickInterval: xAxisTickConfig.tickInterval,
         crosshair: true,
       },
       yAxis: {
@@ -108,7 +157,7 @@ export const VendorChart: React.FC<VendorChartProps> = ({ vendor, colorIndex }) 
         },
       },
     }
-  }, [chartData, maxValue, colorIndex])
+  }, [chartData, maxValue, colorIndex, xAxisTickConfig])
 
   // Отображение в зависимости от состояния
   const renderContent = () => {
@@ -129,7 +178,7 @@ export const VendorChart: React.FC<VendorChartProps> = ({ vendor, colorIndex }) 
       )
     }
 
-    if (!chartData) {
+    if (!chartData || chartData.data.length === 0) {
       return (
         <Empty
           description="Нет данных для отображения"
