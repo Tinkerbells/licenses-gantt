@@ -1,8 +1,8 @@
 import type { Options } from 'highcharts'
 
 import { useEffect, useMemo, useState } from 'react'
+import { LineChart } from '@tinkerbells/xenon-charts'
 import { Card, Empty, Spin } from '@tinkerbells/xenon-ui'
-import { ChartTooltip, ChartTooltipContent, ChartTooltipItem, LineChart } from '@tinkerbells/xenon-charts'
 
 import { useFilter } from '@/context/filter-context'
 
@@ -176,20 +176,6 @@ export function SelectedCompanyChart() {
 
     return (
       <LineChart
-        tooltip={chart => (
-          <ChartTooltip offsetY={-50} offsetX={25} chart={chart}>
-            <ChartTooltipContent>
-              {(ctx) => {
-                return (
-                  <ChartTooltipItem>
-                    <b>{Math.floor(Number(ctx.y))}</b>
-                    т.р.
-                  </ChartTooltipItem>
-                )
-              }}
-            </ChartTooltipContent>
-          </ChartTooltip>
-        )}
         options={chartOptions}
       />
     )

@@ -1,9 +1,8 @@
 import React, { useMemo } from 'react'
+import { LineChart } from '@tinkerbells/xenon-charts'
 import { Card, Empty, Flex, Spin } from '@tinkerbells/xenon-ui'
-import { ChartTooltip, ChartTooltipContent, ChartTooltipItem, LineChart } from '@tinkerbells/xenon-charts'
 
 import { useFilter } from '@/context/filter-context'
-import { formatRub } from '@/shared/lib/utils/format-rub'
 
 interface VendorChartProps {
   vendor: string
@@ -150,23 +149,6 @@ export const VendorChart: React.FC<VendorChartProps> = ({ vendor, colorIndex }) 
 
     return (
       <LineChart
-        tooltip={chart => (
-          <ChartTooltip offsetY={-50} offsetX={25} chart={chart}>
-            <ChartTooltipContent>
-              {(ctx) => {
-                return (
-                  <ChartTooltipItem>
-                    {ctx.series.name}
-                    :
-                    <b>{Math.floor(Number(ctx.y))}</b>
-                    {' '}
-                    т.р.
-                  </ChartTooltipItem>
-                )
-              }}
-            </ChartTooltipContent>
-          </ChartTooltip>
-        )}
         options={chartOptions}
       />
     )
